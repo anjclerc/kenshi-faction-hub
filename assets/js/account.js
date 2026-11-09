@@ -303,6 +303,15 @@
   }
   state.invite = sessionStorage.getItem('kfh-invite');
 
+  // Échec de connexion renvoyé par Supabase (?error_description=...) : on l'affiche au lieu de rester muet.
+  const authError = params.get('error_description') ||
+    new URLSearchParams(location.hash.slice(1)).get('error_description');
+  if (authError) {
+    history.replaceState(null, '', SITE);
+    $('#panel').hidden = false;
+    setTimeout(() => say(`${t('err.login_failed')} (${authError})`, true), 0);
+  }
+
   sb.auth.onAuthStateChange((event) => {
     if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') setTimeout(load, 0);
   });

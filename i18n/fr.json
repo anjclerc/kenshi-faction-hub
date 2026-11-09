@@ -102,5 +102,6 @@
   "err.not_a_member": "Ce joueur n'est pas dans ta faction.",
   "err.use_leave_faction": "Utilise « Quitter la faction ».",
   "err.name_taken": "Ce nom de faction est déjà pris.",
-  "err.invalid_value": "Valeur invalide (vérifie le nom, la couleur ou le lien Discord)."
+  "err.invalid_value": "Valeur invalide (vérifie le nom, la couleur ou le lien Discord).",
+  "err.login_failed": "La connexion Discord a échoué. Réessaie ; si ça continue, préviens l'administrateur du site."
 }
