@@ -112,5 +112,8 @@
   "gate.step_profile": "Ваш персонаж",
   "gate.step_faction": "Ваша фракция",
   "gate.join_hint": "Вставьте код или ссылку от лидера фракции.",
-  "err.game_name_required": "Укажите игровой ник."
+  "err.game_name_required": "Укажите игровой ник.",
+  "gate.invited": "Вас приглашают во фракцию",
+  "gate.joined_as": "Вы вступили во фракцию",
+  "gate.enter": "Войти"
 }

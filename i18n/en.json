@@ -112,5 +112,8 @@
   "gate.step_profile": "Your character",
   "gate.step_faction": "Your faction",
   "gate.join_hint": "Paste the code or link you got from your faction leader.",
-  "err.game_name_required": "Enter your in-game name."
+  "err.game_name_required": "Enter your in-game name.",
+  "gate.invited": "You are invited to join the faction",
+  "gate.joined_as": "You joined",
+  "gate.enter": "Enter"
 }

@@ -6,7 +6,7 @@
     'marchand', 'forgeron', 'fermier', 'mineur', 'medecin', 'eclaireur', 'nouveau'];
   const SITE = location.origin + location.pathname;
 
-  const state = { user: null, profile: null, membership: null, faction: null, parent: null, members: [], history: [], invite: null };
+  const state = { user: null, profile: null, membership: null, faction: null, parent: null, members: [], history: [], invite: null, inviteInfo: null };
   const dbMarkers = [];
 
   const $ = sel => document.querySelector(sel);
@@ -65,6 +65,15 @@
         }
       }
     }
+    // Lien d'invitation : la recrue connectée rejoint directement la faction.
+    if (state.user && state.invite && !state.faction) {
+      const code = state.invite;
+      state.invite = null;
+      sessionStorage.removeItem('kfh-invite');
+      const { error } = await sb.rpc('join_faction', { p_code: code });
+      if (!error) { say(t('acc.joined')); return load(); }
+      say(errText(error), true);
+    }
     renderHeader();
     renderPanel();
     loadMarkers();
@@ -87,18 +96,30 @@
   // Portail : page de connexion, puis pseudo + créer/rejoindre une faction, avant d'accéder à la carte.
   function renderPanel() {
     const body = $('#panel-body');
-    const gate = !state.user || !state.faction;
+    const needName = state.user && state.faction && !state.profile?.game_name;
+    const gate = !state.user || !state.faction || needName;
+    const wasGate = $('#panel').classList.contains('gate');
     $('#panel').classList.toggle('gate', gate);
     $('#panel-close').hidden = gate;
     if (gate) $('#panel').hidden = false;
+    else if (wasGate) $('#panel').hidden = true;   // portail terminé : place à la carte
 
     if (!state.user) {
+      const inv = state.inviteInfo;
       body.innerHTML = `<h1>Kenshi Faction Hub</h1>
+        ${inv ? `<p class="invite-note">${esc(t('gate.invited'))} <b style="color:${esc(inv.faction_color)}">${esc(inv.faction_name)}</b></p>` : ''}
         <p class="tagline">${esc(t('gate.tagline'))}</p>
         <ul class="features"><li>${esc(t('gate.f_map'))}</li><li>${esc(t('gate.f_faction'))}</li><li>${esc(t('gate.f_diplo'))}</li></ul>
-        ${state.invite ? `<p class="invite-note">${esc(t('acc.invite_login'))}</p>` : ''}
+        ${state.invite && !inv ? `<p class="invite-note">${esc(t('acc.invite_login'))}</p>` : ''}
         <button data-act="login" class="discord big">${esc(t('acc.login'))}</button>
         <p class="hint">${esc(t('footer.credit'))}</p>`;
+      return;
+    }
+    if (needName) {
+      body.innerHTML = `<h1>${esc(t('gate.welcome'))}</h1>
+        <p>${esc(t('gate.joined_as'))} <b>${esc(state.faction.name)}</b> (${esc(t('role.' + state.membership.role))}).</p>
+        <h2>${esc(t('gate.step_profile'))}</h2>${profileFields()}
+        <button data-act="finish-profile" class="big">${esc(t('gate.enter'))}</button>`;
       return;
     }
     if (!state.faction) {
@@ -221,6 +242,9 @@
         game_name: $('#p-game').value.trim(), discord_name: $('#p-discord').value.trim()
       }).eq('id', state.user.id));
       if (ok) { say(t('acc.saved')); load(); }
+    },
+    async 'finish-profile'() {
+      if (await saveProfileFromForm()) { await load(); }
     },
     async create() {
       if (!await saveProfileFromForm()) return;
@@ -351,5 +375,11 @@
   document.addEventListener('kfh:lang', () => { renderHeader(); renderPanel(); });
   document.addEventListener('kfh:map-ready', loadMarkers);
 
-  load();
+  (async () => {
+    if (state.invite) {
+      const { data } = await sb.rpc('invite_info', { p_code: state.invite });
+      state.inviteInfo = data?.[0] ?? null;
+    }
+    load();
+  })();
 })();

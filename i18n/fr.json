@@ -112,5 +112,8 @@
   "gate.step_profile": "Ton personnage",
   "gate.step_faction": "Ta faction",
   "gate.join_hint": "Colle le code ou le lien reçu de ton chef de faction.",
-  "err.game_name_required": "Indique ton pseudo en jeu."
+  "err.game_name_required": "Indique ton pseudo en jeu.",
+  "gate.invited": "Tu es invité à rejoindre la faction",
+  "gate.joined_as": "Tu as rejoint",
+  "gate.enter": "Entrer"
 }

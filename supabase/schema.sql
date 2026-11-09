@@ -150,6 +150,15 @@ begin
   return inv.faction_id;
 end $$;
 
+-- Infos publiques d'une invitation (nom et couleur de la faction) pour l'écran d'accueil de la recrue.
+create or replace function public.invite_info(p_code text)
+returns table (faction_name text, faction_color text) language sql stable security definer set search_path = '' as $$
+  select f.name, f.color from public.invites i join public.factions f on f.id = i.faction_id
+  where i.code = p_code and i.expires_at > now() and i.uses < i.max_uses and f.status = 'active'
+$$;
+revoke execute on function public.invite_info from public;
+grant execute on function public.invite_info to anon, authenticated;
+
 -- Quitter sa faction. Le Créateur doit d'abord transmettre son rôle, sauf s'il est seul (faction archivée).
 create or replace function public.leave_faction()
 returns void language plpgsql security definer set search_path = '' as $$
