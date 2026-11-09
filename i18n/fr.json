@@ -286,5 +286,8 @@
   "terr.danger": "☠️ danger",
   "terr.visibility": "Qui voit cette zone",
   "marker.confirm_hint": "Position choisie (cercle blanc). Clique sur « Placer le marqueur ici » pour valider, ou ailleurs sur la carte pour changer.",
-  "marker.click_first": "Clique d'abord sur la carte à l'endroit voulu."
+  "marker.click_first": "Clique d'abord sur la carte à l'endroit voulu.",
+  "update.available": "Une nouvelle version du site est disponible.",
+  "update.reload": "Recharger",
+  "update.later": "Plus tard"
 }

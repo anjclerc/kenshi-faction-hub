@@ -140,3 +140,34 @@ const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g,
   await I18N.load(select.value);
   select.addEventListener('change', () => I18N.load(select.value));
 })();
+
+// ───────── Suivi de version ─────────
+// Toutes les 5 minutes (et au retour sur l'onglet), on compare la version de la page à celle publiée.
+// Si le site a été mis à jour, un bandeau propose de recharger.
+(() => {
+  let shown = false;
+  async function check() {
+    if (shown || document.hidden) return;
+    try {
+      const res = await fetch(`version.json?t=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) return;                              // pas de fichier (développement local)
+      const { version } = await res.json();
+      if (version && String(version) !== String(ASSET_VERSION)) show();
+    } catch (e) { /* hors ligne : on réessaiera */ }
+  }
+  function show() {
+    shown = true;
+    const bar = document.createElement('div');
+    bar.id = 'update-bar';
+    bar.innerHTML = `<span>🆕 ${I18N.t('update.available')}</span>
+      <button>${I18N.t('update.reload')}</button>
+      <button class="link" aria-label="×">${I18N.t('update.later')}</button>`;
+    const [reload, later] = bar.querySelectorAll('button');
+    reload.onclick = () => location.reload();
+    later.onclick = () => bar.remove();
+    document.body.appendChild(bar);
+  }
+  setInterval(check, 5 * 60 * 1000);
+  document.addEventListener('visibilitychange', check);
+  setTimeout(check, 30 * 1000);
+})();

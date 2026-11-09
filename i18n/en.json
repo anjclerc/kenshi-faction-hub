@@ -286,5 +286,8 @@
   "terr.danger": "☠️ danger",
   "terr.visibility": "Who sees this zone",
   "marker.confirm_hint": "Position selected (white circle). Click “Place the marker here” to confirm, or elsewhere on the map to change it.",
-  "marker.click_first": "First click on the map where you want it."
+  "marker.click_first": "First click on the map where you want it.",
+  "update.available": "A new version of the site is available.",
+  "update.reload": "Reload",
+  "update.later": "Later"
 }

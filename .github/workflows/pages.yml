@@ -25,6 +25,9 @@ jobs:
       # Numéro de version sur les fichiers CSS/JS : évite que les navigateurs gardent une ancienne version en cache.
       - name: Cache-busting
         run: sed -i -E "s#(assets/(css|js)/[a-z0-9]+\.(css|js))(\?v=[a-z0-9]+)?\"#\1?v=${GITHUB_SHA::7}\"#g" index.html
+      # Numéro de version publié : les pages ouvertes le comparent pour proposer de recharger.
+      - name: Version
+        run: echo "{\"version\":\"${GITHUB_SHA::7}\"}" > version.json
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

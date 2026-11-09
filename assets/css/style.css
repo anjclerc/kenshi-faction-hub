@@ -211,3 +211,11 @@ header h1 { font-size: 1.15rem; }
 @keyframes terr-pulse { 0%, 100% { stroke-opacity: 1; stroke-width: 3; } 50% { stroke-opacity: .35; stroke-width: 6; } }
 @media (prefers-reduced-motion: reduce) { .terr-enemy { animation: none; } }
 aside button:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ───── Bandeau « nouvelle version » ───── */
+#update-bar {
+  position: fixed; bottom: 2.2rem; left: 50%; transform: translateX(-50%); z-index: 2500;
+  display: flex; align-items: center; gap: .7rem; padding: .6rem 1rem;
+  background: var(--panel) var(--grain); border: 1px solid var(--accent); box-shadow: 0 6px 20px rgba(0, 0, 0, .6);
+}
+#update-bar button.link { background: none; border: 0; box-shadow: none; text-decoration: underline; color: var(--muted); }
