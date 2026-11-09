@@ -25,12 +25,12 @@ Un site web pour les joueurs qui jouent à Kenshi en multijoueur, avec le mod [A
 |---|---|---|
 | 1 | Carte interactive (Leaflet) + 304 lieux du jeu + marqueurs + multilingue | ✅ |
 | 2 | Comptes, factions, rôles (Supabase) + pseudo en jeu modifiable, pseudo Discord, Discord de la faction, invitation par lien | ✅ Connexion, factions, invitations, marqueurs en ligne, votes |
-| 3 | Diplomatie white/black list, couleurs sur la carte | ⏳ |
+| 3 | Diplomatie : alliances réciproques, ennemis, partage des marqueurs entre alliés | ✅ (territoires à venir) |
 | 4 | Mise en ligne GitHub Pages | ⏳ |
 | 5 | Intégration en jeu (selon l'accord de l'auteur d'AnarchyKenshi) | 💭 |
 
 ### Base de données (Supabase)
-Exécuter dans l'ordre dans *SQL Editor* : `supabase/schema.sql`, `supabase/002_votes.sql`, `supabase/003_delete_empty.sql`, `supabase/004_mercenaries.sql`.
+Exécuter dans l'ordre dans *SQL Editor* : `supabase/schema.sql`, `supabase/002_votes.sql`, `supabase/003_delete_empty.sql`, `supabase/004_mercenaries.sql`, `supabase/005_alliances.sql`, `supabase/006_quotas.sql`.
 
 ### Utiliser en jeu
 Ouvre le site dans le **navigateur de l'overlay Steam** (`Maj` + `Tab`).
@@ -63,7 +63,7 @@ A website for players running Kenshi in multiplayer with the [AnarchyKenshi](htt
 |---|---|---|
 | 1 | Interactive map (Leaflet) + 304 in-game places + markers + i18n | ✅ |
 | 2 | Accounts, factions, roles (Supabase) + editable in-game name, Discord name, faction Discord, invite links | ✅ Sign-in, factions, invites, online markers, votes |
-| 3 | Diplomacy white/black list, colours on the map | ⏳ |
+| 3 | Diplomacy: mutual alliances, enemies, marker sharing between allies | ✅ (territories coming) |
 | 4 | Publish on GitHub Pages | ⏳ |
 | 5 | In-game integration (depends on the AnarchyKenshi author) | 💭 |
 

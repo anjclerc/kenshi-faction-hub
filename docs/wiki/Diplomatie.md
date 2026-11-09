@@ -1,17 +1,24 @@
 # Diplomatie
 
-Chaque faction définit sa relation avec les autres factions joueurs.
+Onglet **Diplomatie** du panneau. Un *camp* = une faction ou un joueur indépendant.
 
-| Statut | Liste | Couleur sur la carte |
+| Relation | Comment | Effet |
 |---|---|---|
-| **Allié** | White list | Vert |
-| **Neutre** | — | Gris |
-| **Ennemi** | Black list | Rouge |
+| **Alliance** 🤝 | Un camp propose, l'autre accepte (réciproque) | Partage de marqueurs selon le niveau choisi |
+| **Neutre** | Par défaut, ou « Rompre » / « Faire la paix » | Aucun partage |
+| **Ennemi** ⚔ | Déclaration unilatérale | Visible dans « Nous ont déclarés ennemis » chez l'autre camp |
 
-## Joueurs
-En plus des factions, on peut lister des **joueurs** :
-- **White list** : joueurs autorisés sur nos bases.
-- **Black list** : joueurs bannis / à attaquer à vue.
+## Ce que voit un allié
+Chaque camp choisit, **pour chaque allié** :
+- **Rien**
+- **Notre base principale** (marqueur « Notre base » coché ★ Base principale)
+- **Toutes nos bases**
+- **Tous nos marqueurs**
 
-## Qui peut modifier ?
-Le **Créateur** et le **Diplomate**. Les autres membres voient les relations.
+En plus, un marqueur réglé sur **🤝 Nos alliés** est montré à tous les alliés. Sur la carte, les marqueurs d'un allié ont un **contour vert en pointillés**.
+
+## Qui gère ?
+Le **Créateur**, le **Chef** (régime démocratique) et le **Diplomate**. Un **indépendant** gère ses propres alliances.
+
+## Cloisonnement
+Sans alliance, une faction ne voit **jamais** les marqueurs d'une autre (sauf ceux réglés sur 🌍 Tout le monde).

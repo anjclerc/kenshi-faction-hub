@@ -9,7 +9,8 @@
 
   const state = { user: null, profile: null, membership: null, faction: null, parent: null, members: [], history: [], invite: null, inviteInfo: null,
     tab: 'faction', proposals: [], myVotes: {}, draft: {},
-    mercs: [], myMerc: null, hires: [], hireDraft: {} };
+    mercs: [], myMerc: null, hires: [], hireDraft: {},
+    relations: [], factions: [], independents: [] };
   const dbMarkers = [];
   const raidMarkers = [];
 
@@ -21,6 +22,8 @@
   // Gestionnaire : le Créateur ; en faction démocratique, le Chef aussi.
   const isManager = () => isCreator() || (state.membership?.role === 'chef' && state.faction?.governance === 'democratic');
   const isSolo = () => !state.faction && !!state.profile?.solo;
+  const myParty = () => state.faction ? 'f:' + state.faction.id : 'p:' + state.user?.id;
+  const canDiplo = () => !state.faction || isManager() || state.membership?.role === 'diplomate';
   const canHire = () => !state.faction || ['createur', 'chef', 'diplomate'].includes(state.membership?.role);
 
   function say(msg, isError = false) {
@@ -101,11 +104,28 @@
       if (!error) { say(t('acc.joined')); return load(); }
       say(errText(error), true);
     }
-    if (state.user) await loadMercs();
+    if (state.user) await Promise.all([loadMercs(), loadDiplo()]);
     renderHeader();
     renderPanel();
     loadMarkers();
     drawRaidTargets();
+  }
+
+  async function loadDiplo() {
+    const [r, f, ind] = await Promise.all([
+      sb.from('relations').select('*'),
+      sb.from('factions').select('id, name, color, tags').eq('status', 'active').order('name'),
+      sb.rpc('list_independents')
+    ]);
+    state.relations = r.data ?? [];
+    state.factions = f.data ?? [];
+    state.independents = ind.data ?? [];
+  }
+  function partyName(p) {
+    const [k, id] = p.split(':');
+    if (k === 'f') return state.factions.find(x => x.id === id)?.name ?? '?';
+    const i = state.independents.find(x => x.id === id);
+    return i ? `${i.game_name} (${t('merc.solo')})` : '?';
   }
 
   async function loadMercs() {
@@ -150,7 +170,8 @@
         ${state.faction || isSolo() ? `<button data-act="open-mercs">${esc(t('merc.tab'))}${pending ? ` <b class="badge">${pending}</b>` : ''}</button>` : ''}
         <button data-act="logout">${esc(t('acc.logout'))}</button>`;
     }
-    $('#marker-visibility').hidden = !state.faction || !canPlaceMarker();
+    $('#marker-visibility').hidden = !canPlaceMarker();
+    $('#marker-main-label').hidden = !canPlaceMarker();
   }
 
   // ───────── Panneau ─────────
@@ -190,12 +211,13 @@
         <button data-act="logout" class="link">${esc(t('acc.logout'))}</button>`;
       return;
     }
-    const tabList = state.faction ? ['faction', 'votes', 'mercs'] : ['faction', 'mercs'];
+    const tabList = state.faction ? ['faction', 'votes', 'diplo', 'mercs'] : ['faction', 'diplo', 'mercs'];
     if (!tabList.includes(state.tab)) state.tab = 'faction';
-    const label = { faction: state.faction ? 'vote.tab_faction' : 'acc.profile', votes: 'vote.tab', mercs: 'merc.tab' };
+    const label = { faction: state.faction ? 'vote.tab_faction' : 'acc.profile', votes: 'vote.tab', diplo: 'diplo.tab', mercs: 'merc.tab' };
     const tabs = `<nav class="tabs">${tabList.map(k =>
       `<button data-act="tab" data-tab="${k}" class="${state.tab === k ? 'active' : ''}">${esc(t(label[k]))}</button>`).join('')}</nav>`;
     const content = state.tab === 'votes' ? votesHtml()
+      : state.tab === 'diplo' ? diploHtml()
       : state.tab === 'mercs' ? mercsHtml()
       : state.faction ? profileHtml() + factionHtml()
       : profileHtml() + `<h2>${esc(t('merc.solo_title'))}</h2><p class="hint">${esc(t('merc.solo_hint'))}</p>` + noFactionHtml(false);
@@ -403,6 +425,53 @@
     }
   }
 
+  // ───────── Diplomatie ─────────
+  const SHARES = ['none', 'main', 'bases', 'all'];
+  function diploHtml() {
+    const me = myParty();
+    const mine = Object.fromEntries(state.relations.filter(r => r.from_party === me).map(r => [r.to_party, r]));
+    const theirs = Object.fromEntries(state.relations.filter(r => r.to_party === me).map(r => [r.from_party, r]));
+    const edit = canDiplo();
+    const btn = (act, party, label, extra = '') =>
+      edit ? `<button data-act="${act}" data-party="${party}" ${extra}>${esc(t(label))}</button>` : '';
+    const row = (party, body) => `<article class="merc"><h3>${esc(partyName(party))}</h3>${body}</article>`;
+
+    const allies = Object.keys(mine).filter(p => mine[p].stance === 'ally' && theirs[p]?.stance === 'ally');
+    const incoming = Object.keys(theirs).filter(p => theirs[p].stance === 'ally' && mine[p]?.stance !== 'ally');
+    const outgoing = Object.keys(mine).filter(p => mine[p].stance === 'ally' && theirs[p]?.stance !== 'ally');
+    const enemies = Object.keys(mine).filter(p => mine[p].stance === 'enemy');
+    const hostile = Object.keys(theirs).filter(p => theirs[p].stance === 'enemy');
+    const known = new Set([...allies, ...incoming, ...outgoing, ...enemies]);
+    const others = [
+      ...state.factions.filter(f => 'f:' + f.id !== me).map(f => ({ p: 'f:' + f.id, tags: f.tags })),
+      ...state.independents.filter(i => 'p:' + i.id !== me).map(i => ({ p: 'p:' + i.id, tags: [] }))
+    ].filter(o => !known.has(o.p));
+
+    const shareSelect = p => edit
+      ? `<label>${esc(t('diplo.share'))} <select class="d-share" data-party="${p}">${SHARES.map(x =>
+          `<option value="${x}" ${mine[p].share === x ? 'selected' : ''}>${esc(t('diplo.share_' + x))}</option>`).join('')}</select></label>`
+      : `<p class="hint">${esc(t('diplo.share'))} : ${esc(t('diplo.share_' + mine[p].share))}</p>`;
+
+    const section = (title, list) => list.length ? `<h3>${esc(t(title))} (${list.length})</h3>${list.join('')}` : '';
+    return `<h2>${esc(t('diplo.tab'))}</h2>
+      <p class="hint">${esc(t('diplo.intro'))}</p>
+      ${edit ? '' : `<p class="hint">${esc(t('diplo.no_right'))}</p>`}
+      ${section('diplo.incoming', incoming.map(p => row(p,
+        btn('d-ally', p, 'diplo.accept') + btn('d-neutral', p, 'diplo.decline', 'class="danger"'))))}
+      ${section('diplo.allies', allies.map(p => row(p, shareSelect(p) + btn('d-neutral', p, 'diplo.break', 'class="link"'))))}
+      ${section('diplo.outgoing', outgoing.map(p => row(p, `<p class="hint">${esc(t('diplo.waiting'))}</p>` + btn('d-neutral', p, 'diplo.cancel', 'class="link"'))))}
+      ${section('diplo.enemies', enemies.map(p => row(p, btn('d-neutral', p, 'diplo.peace'))))}
+      ${section('diplo.hostile', hostile.map(p => row(p, `<p class="hint">⚔ ${esc(t('diplo.hostile_hint'))}</p>`)))}
+      ${section('diplo.others', others.map(o => row(o.p,
+        `${(o.tags ?? []).map(x => `<span class="chip">${esc(t('tag.' + x))}</span>`).join(' ')}<br>` +
+        btn('d-ally', o.p, 'diplo.propose') + btn('d-enemy', o.p, 'diplo.declare_enemy', 'class="danger"'))))}`;
+  }
+
+  async function relation(party, stance, share = null) {
+    const ok = await call(sb.rpc('set_relation', { p_to: party, p_stance: stance, p_share: share }));
+    if (ok) { say(t('acc.saved')); await loadDiplo(); renderPanel(); loadMarkers(); }
+  }
+
   // ───────── Mercenaires ─────────
   function mercsHtml() {
     const me = state.myMerc ?? { available: false };
@@ -472,6 +541,14 @@
     },
     open() { state.tab = 'faction'; renderPanel(); $('#panel').hidden = false; },
     'open-votes'() { state.tab = 'votes'; renderPanel(); $('#panel').hidden = false; },
+    async 'd-ally'(btn) {
+      const r = state.relations.find(x => x.from_party === myParty() && x.to_party === btn.dataset.party);
+      await relation(btn.dataset.party, 'ally', r?.stance === 'ally' ? r.share : 'main');
+    },
+    async 'd-neutral'(btn) { await relation(btn.dataset.party, 'neutral'); },
+    async 'd-enemy'(btn) {
+      if (await askConfirm(t('diplo.enemy_confirm'))) await relation(btn.dataset.party, 'enemy');
+    },
     'open-mercs'() { state.tab = 'mercs'; renderPanel(); $('#panel').hidden = false; },
     async 'go-solo'() {
       if (!await saveProfileFromForm()) return;
@@ -624,6 +701,7 @@
   });
   document.addEventListener('change', async e => {
     if (e.target.id === 'v-kind') { updateVoteForm(); return; }
+    if (e.target.matches('.d-share')) { await relation(e.target.dataset.party, 'ally', e.target.value); return; }
     if (!e.target.matches('.m-role')) return;
     const role = e.target.value;
     if (role === 'createur' && !await askConfirm(t('acc.transfer_confirm'))) { renderPanel(); return; }
@@ -648,8 +726,12 @@
     const { data } = await sb.from('markers').select('*');
     dbMarkers.splice(0).forEach(l => l.remove());
     for (const m of data ?? []) {
-      const layer = KFH.dot(m.x, m.y, KFH.MARKER_STYLES[m.type] ?? KFH.MARKER_STYLES.other, 8)
-        .bindTooltip(() => `${esc(m.name)} (${t('marker.' + m.type)})`);
+      const own = m.faction_id ? m.faction_id === state.faction?.id : m.created_by === state.user?.id;
+      const owner = m.faction_id ? 'f:' + m.faction_id : 'p:' + m.created_by;
+      const layer = KFH.dot(m.x, m.y, KFH.MARKER_STYLES[m.type] ?? KFH.MARKER_STYLES.other, m.is_main ? 11 : 8)
+        .bindTooltip(() => `${m.is_main ? '★ ' : ''}${esc(m.name)} (${t('marker.' + m.type)})` +
+          (own ? '' : `<br>🤝 ${esc(partyName(owner))}`));
+      if (!own) layer.setStyle({ color: '#8fbf6a', weight: 3, dashArray: '3 3' });   // marqueur d'un allié
       if (canDelete(m)) {
         layer.bindPopup(() => {
           const div = document.createElement('div');
@@ -669,7 +751,8 @@
     if (!canPlaceMarker()) return false;
     const ok = await call(sb.from('markers').insert({
       ...m, faction_id: state.faction?.id ?? null, created_by: state.user.id,
-      visibility: state.faction ? $('#marker-visibility').value : 'faction'
+      visibility: $('#marker-visibility').value,
+      is_main: m.type === 'own_base' && $('#marker-main').checked
     }));
     if (ok) loadMarkers();
     return !!ok;

@@ -33,8 +33,10 @@
       <input id="marker-name" type="text" maxlength="60" data-i18n-placeholder="marker.name">
       <select id="marker-visibility" hidden>
         <option value="faction" data-i18n="marker.vis_faction">Visible par ma faction</option>
+        <option value="allies" data-i18n="marker.vis_allies">Visible par nos alliés</option>
         <option value="public" data-i18n="marker.vis_public">Visible par tous</option>
       </select>
+      <label id="marker-main-label" hidden><input type="checkbox" id="marker-main"> <span data-i18n="marker.main">Base principale</span></label>
       <button id="marker-place" data-i18n="marker.place">Placer sur la carte</button>
       <p class="hint" id="marker-hint" data-i18n="map.hint">Clique sur la carte pour obtenir les coordonnées.</p>
       <textarea id="marker-json" readonly rows="3"></textarea>
