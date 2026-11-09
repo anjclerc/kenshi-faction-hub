@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kenshi Faction Hub</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Kenshi Faction Hub</h1>
+    <nav>
+      <label for="lang" data-i18n="lang.label">Langue</label>
+      <select id="lang">
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+        <option value="ru">Русский</option>
+      </select>
+    </nav>
+  </header>
+
+  <main>
+    <aside>
+      <h2 data-i18n="layers.title">Calques</h2>
+      <label><input type="checkbox" id="layer-towns" checked> <span data-i18n="layers.towns">Villes</span></label>
+      <p class="hint" data-i18n="map.hint">Clique sur la carte pour obtenir les coordonnées.</p>
+      <output id="coords"></output>
+    </aside>
+    <div id="map"></div>
+  </main>
+
+  <footer>
+    <span data-i18n="footer.credit">Une idée de Akumetsu, créée avec Claude.</span>
+    · <span data-i18n="footer.disclaimer">Kenshi © Lo-Fi Games. Projet de fans non officiel.</span>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
