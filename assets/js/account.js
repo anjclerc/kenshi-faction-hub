@@ -10,7 +10,7 @@
   const state = { user: null, profile: null, membership: null, faction: null, parent: null, members: [], history: [], invite: null, inviteInfo: null,
     tab: 'faction', previewRole: null, proposals: [], myVotes: {}, draft: {},
     mercs: [], myMerc: null, hires: [], hireDraft: {},
-    relations: [], factions: [], independents: [], territories: [], drawing: null };
+    relations: [], factions: [], independents: [], territories: [], drawing: null, joinRequests: [] };
   const dbMarkers = [];
   const raidMarkers = [];
 
@@ -107,13 +107,21 @@
       if (!error) { say(t('acc.joined')); return load(); }
       say(errText(error), true);
     }
-    if (state.user) await Promise.all([loadMercs(), loadDiplo()]);
+    if (state.user) await Promise.all([loadMercs(), loadDiplo(), loadJoin()]);
     renderHeader();
     renderPanel();
     loadMarkers();
     drawRaidTargets();
     loadTerritories();
   }
+
+  async function loadJoin() {
+    const { data } = await sb.from('join_requests')
+      .select('*, profiles(game_name, discord_name), factions(name)').eq('status', 'pending').order('created_at');
+    state.joinRequests = data ?? [];
+  }
+  const incomingJoins = () => state.faction && isManager()
+    ? state.joinRequests.filter(r => r.faction_id === state.faction.id) : [];
 
   async function loadDiplo() {
     const [r, f, ind] = await Promise.all([
@@ -174,7 +182,7 @@
       if (state.faction || isSolo()) {
         const open = !$('#panel').hidden && !$('#panel').classList.contains('gate');
         const items = [['map', '🗺️ ' + t('nav.map'), 0],
-          ['faction', (state.faction ? '🛡️ ' + state.faction.name : '👤 ' + t('acc.profile')), 0],
+          ['faction', (state.faction ? '🛡️ ' + state.faction.name : '👤 ' + t('acc.profile')), incomingJoins().length],
           ...(state.faction ? [['votes', '⚖️ ' + t('vote.tab'), canVote() ? todo : 0]] : []),
           ['diplo', '🤝 ' + t('diplo.tab'), canDiplo() ? incoming : 0],
           ['mercs', '🗡️ ' + t('merc.tab'), pending]];
@@ -281,10 +289,19 @@
       <label>${esc(t('acc.governance'))} <select id="c-gov">${governanceOptions('authoritarian')}</select></label>
       <p class="hint">${esc(t('acc.governance_hint'))}</p>
       <button data-act="create">${esc(t('acc.create'))}</button></div>`;
+    const mine = state.joinRequests.filter(r => r.profile_id === state.user.id);
+    const ask = state.factions.length ? `<div class="choice wide"><h3>${esc(t('join.title'))}</h3>
+      <p class="hint">${esc(t('join.hint'))}</p>
+      <label>${esc(t('join.faction'))} <select id="jr-faction">${state.factions.map(f =>
+        `<option value="${f.id}">${esc(f.name)}${(f.tags ?? []).length ? ' — ' + f.tags.map(x => t('tag.' + x)).join(', ') : ''}</option>`).join('')}</select></label>
+      <label>${esc(t('join.message'))} <input id="jr-message" maxlength="300" placeholder="${esc(t('join.message_ph'))}"></label>
+      <button data-act="join-request">${esc(t('join.send'))}</button>
+      ${mine.map(r => `<p class="hint">⏳ ${esc(t('join.pending'))} <b>${esc(r.factions?.name)}</b>
+        <button data-act="join-cancel" data-id="${r.id}" class="link">${esc(t('merc.cancel'))}</button></p>`).join('')}</div>` : '';
     const solo = withSolo ? `<div class="choice wide"><h3>${esc(t('merc.solo_choice'))}</h3>
       <p class="hint">${esc(t('merc.solo_choice_hint'))}</p>
       <button data-act="go-solo">${esc(t('merc.solo_go'))}</button></div>` : '';
-    return `<div class="choices">${state.invite ? join + create : create + join}${solo}</div>`;
+    return `<div class="choices">${state.invite ? join + create : create + join}${ask}${solo}</div>`;
   }
 
   function factionHtml() {
@@ -302,6 +319,14 @@
       html += `<label class="preview-pick">👁 ${esc(t('preview.label'))} <select id="preview-role">
         <option value="">${esc(t('preview.none'))}</option>${ROLES.filter(r => r !== 'createur').map(r =>
           `<option value="${r}" ${state.previewRole === r ? 'selected' : ''}>${esc(t('role.' + r))}</option>`).join('')}</select></label>`;
+    }
+    const joins = incomingJoins();
+    if (joins.length) {
+      html += `<h3>📨 ${esc(t('join.incoming'))} (${joins.length})</h3>` + joins.map(r => `<article class="merc">
+        <h3>${esc(r.profiles?.game_name || '?')} <span class="hint">· Discord : ${esc(r.profiles?.discord_name || '—')}</span></h3>
+        ${r.message ? `<p class="desc">${esc(r.message)}</p>` : ''}
+        <button data-act="join-answer" data-id="${r.id}" data-accept="1">${esc(t('merc.accept'))}</button>
+        <button data-act="join-answer" data-id="${r.id}" data-accept="" class="danger">${esc(t('merc.decline'))}</button></article>`).join('');
     }
     if (isManager()) html += manageHtml(f);
     if (canDraw()) html += territoriesHtml();
@@ -679,6 +704,18 @@
     async 'terr-delete'(btn) {
       if (!await askConfirm(t('terr.delete_confirm'))) return;
       if (await call(sb.from('territories').delete().eq('id', +btn.dataset.id))) loadTerritories();
+    },
+    async 'join-request'() {
+      if ($('#p-game') && !await saveProfileFromForm()) return;   // portail : pseudo en jeu obligatoire
+      const ok = await call(sb.rpc('request_join', { p_faction: $('#jr-faction').value, p_message: $('#jr-message').value }));
+      if (ok) { say(t('join.sent')); await loadJoin(); renderPanel(); }
+    },
+    async 'join-cancel'(btn) {
+      if (await call(sb.rpc('cancel_join', { p_request: +btn.dataset.id }))) { await loadJoin(); renderPanel(); }
+    },
+    async 'join-answer'(btn) {
+      const ok = await call(sb.rpc('answer_join', { p_request: +btn.dataset.id, p_accept: !!btn.dataset.accept }));
+      if (ok) { say(t(btn.dataset.accept ? 'join.accepted' : 'join.declined')); await load(); }
     },
     async 'd-ally'(btn) {
       const r = state.relations.find(x => x.from_party === myParty() && x.to_party === btn.dataset.party);

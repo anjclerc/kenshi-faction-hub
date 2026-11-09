@@ -289,5 +289,17 @@
   "marker.click_first": "Clique d'abord sur la carte à l'endroit voulu.",
   "update.available": "Une nouvelle version du site est disponible.",
   "update.reload": "Recharger",
-  "update.later": "Plus tard"
+  "update.later": "Plus tard",
+  "join.title": "Demander à rejoindre une faction",
+  "join.hint": "Pas de lien d'invitation ? Envoie une demande : le chef de la faction l'accepte ou la refuse.",
+  "join.faction": "Faction",
+  "join.message": "Message (facultatif)",
+  "join.message_ph": "ex. : je joue le soir, j'aime le minage",
+  "join.send": "Envoyer la demande",
+  "join.sent": "Demande envoyée. Tu rejoindras la faction dès qu'elle sera acceptée.",
+  "join.pending": "Demande en attente pour",
+  "join.incoming": "Demandes d'adhésion",
+  "join.accepted": "Demande acceptée : le joueur a rejoint la faction.",
+  "join.declined": "Demande refusée.",
+  "err.quota_join": "Tu as déjà 5 demandes en attente."
 }

@@ -289,5 +289,17 @@
   "marker.click_first": "First click on the map where you want it.",
   "update.available": "A new version of the site is available.",
   "update.reload": "Reload",
-  "update.later": "Later"
+  "update.later": "Later",
+  "join.title": "Ask to join a faction",
+  "join.hint": "No invite link? Send a request: the faction leader accepts or declines it.",
+  "join.faction": "Faction",
+  "join.message": "Message (optional)",
+  "join.message_ph": "e.g. I play evenings, I like mining",
+  "join.send": "Send the request",
+  "join.sent": "Request sent. You'll join the faction as soon as it's accepted.",
+  "join.pending": "Request pending for",
+  "join.incoming": "Join requests",
+  "join.accepted": "Request accepted: the player joined the faction.",
+  "join.declined": "Request declined.",
+  "err.quota_join": "You already have 5 pending requests."
 }
