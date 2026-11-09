@@ -301,5 +301,9 @@
   "join.incoming": "Заявки на вступление",
   "join.accepted": "Заявка принята: игрок вступил во фракцию.",
   "join.declined": "Заявка отклонена.",
-  "err.quota_join": "У вас уже 5 ожидающих запросов."
+  "err.quota_join": "У вас уже 5 ожидающих запросов.",
+  "search.placeholder": "🔍 Найти место, метку…",
+  "nav.layers": "☰ Слои",
+  "marker.edit": "Изменить",
+  "marker.delete_confirm": "Удалить эту метку?"
 }

@@ -10,7 +10,7 @@
   const state = { user: null, profile: null, membership: null, faction: null, parent: null, members: [], history: [], invite: null, inviteInfo: null,
     tab: 'faction', previewRole: null, proposals: [], myVotes: {}, draft: {},
     mercs: [], myMerc: null, hires: [], hireDraft: {},
-    relations: [], factions: [], independents: [], territories: [], drawing: null, joinRequests: [] };
+    relations: [], factions: [], independents: [], territories: [], drawing: null, joinRequests: [], markerData: [] };
   const dbMarkers = [];
   const raidMarkers = [];
 
@@ -904,6 +904,7 @@
   async function loadMarkers() {
     if (!KFH.map) return;
     const { data } = await sb.from('markers').select('*');
+    state.markerData = data ?? [];
     dbMarkers.splice(0).forEach(l => l.remove());
     for (const m of data ?? []) {
       const own = m.faction_id ? m.faction_id === state.faction?.id : m.created_by === state.user?.id;
@@ -915,10 +916,33 @@
       if (canDelete(m)) {
         layer.bindPopup(() => {
           const div = document.createElement('div');
-          div.innerHTML = `<b>${esc(m.name)}</b><br><button>${esc(t('marker.delete'))}</button>`;
-          div.querySelector('button').onclick = async () => {
-            if (await call(sb.from('markers').delete().eq('id', m.id))) loadMarkers();
+          div.className = 'marker-popup';
+          const view = () => {
+            div.innerHTML = `<b>${m.is_main ? '★ ' : ''}${esc(m.name)}</b><br>
+              <button data-edit>✏️ ${esc(t('marker.edit'))}</button> <button data-del>${esc(t('marker.delete'))}</button>`;
+            div.querySelector('[data-del]').onclick = async () => {
+              if (await askConfirm(t('marker.delete_confirm')) && await call(sb.from('markers').delete().eq('id', m.id))) loadMarkers();
+            };
+            div.querySelector('[data-edit]').onclick = edit;
           };
+          const edit = () => {
+            const opt = (list, cur, key) => list.map(v => `<option value="${v}" ${v === cur ? 'selected' : ''}>${esc(t(key + v))}</option>`).join('');
+            div.innerHTML = `<input data-f="name" maxlength="60" value="${esc(m.name)}">
+              <select data-f="type">${opt(Object.keys(KFH.MARKER_STYLES), m.type, 'marker.')}</select>
+              <select data-f="visibility">${opt(['faction', 'allies', 'public'], m.visibility, 'marker.vis_')}</select>
+              <label><input type="checkbox" data-f="is_main" ${m.is_main ? 'checked' : ''}> ${esc(t('marker.main'))}</label>
+              <button data-save>${esc(t('acc.save'))}</button> <button data-cancel>${esc(t('acc.confirm_no'))}</button>`;
+            const f = k => div.querySelector(`[data-f=${k}]`);
+            div.querySelector('[data-cancel]').onclick = view;
+            div.querySelector('[data-save]').onclick = async () => {
+              const ok = await call(sb.from('markers').update({
+                name: f('name').value.trim() || m.name, type: f('type').value,
+                visibility: f('visibility').value, is_main: f('type').value === 'own_base' && f('is_main').checked
+              }).eq('id', m.id));
+              if (ok) { KFH.map.closePopup(); loadMarkers(); }
+            };
+          };
+          view();
           return div;
         });
       }
@@ -926,6 +950,11 @@
       dbMarkers.push(layer);
     }
   }
+
+  KFH.extraSearch = () => [
+    ...state.markerData.map(m => ({ name: m.name, x: m.x, y: m.y })),
+    ...state.territories.map(z => ({ name: z.name, points: z.points }))
+  ];
 
   KFH.onMarkerPlaced = async m => {
     if (!canPlaceMarker()) return false;

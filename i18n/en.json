@@ -301,5 +301,9 @@
   "join.incoming": "Join requests",
   "join.accepted": "Request accepted: the player joined the faction.",
   "join.declined": "Request declined.",
-  "err.quota_join": "You already have 5 pending requests."
+  "err.quota_join": "You already have 5 pending requests.",
+  "search.placeholder": "🔍 Search a place, a marker…",
+  "nav.layers": "☰ Layers",
+  "marker.edit": "Edit",
+  "marker.delete_confirm": "Delete this marker?"
 }

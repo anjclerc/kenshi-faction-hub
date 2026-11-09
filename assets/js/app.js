@@ -130,6 +130,32 @@ const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g,
     hint.textContent = I18N.t('marker.copy');
   });
 
+  // Recherche : lieux du jeu + (via account.js) marqueurs et territoires visibles.
+  const search = document.getElementById('search');
+  const searchItems = () => [...places.map(p => ({ name: p.name, x: p.x, y: p.y })), ...(KFH.extraSearch?.() ?? [])];
+  search.addEventListener('focus', () => {
+    document.getElementById('search-list').innerHTML =
+      [...new Set(searchItems().map(i => i.name))].map(n => `<option value="${escapeHtml(n)}">`).join('');
+  });
+  search.addEventListener('change', () => {
+    const q = search.value.trim().toLowerCase();
+    if (!q) return;
+    const items = searchItems();
+    const it = items.find(i => i.name.toLowerCase() === q) ?? items.find(i => i.name.toLowerCase().includes(q));
+    if (!it) return;
+    if (it.points) map.fitBounds(L.latLngBounds(it.points.map(([x, y]) => toLatLng(x, y))), { padding: [40, 40] });
+    else map.flyTo(toLatLng(it.x, it.y), Math.max(map.getZoom(), 3));
+    if (it.x != null) {   // repère qui pulse quelques secondes
+      const ring = L.circleMarker(toLatLng(it.x, it.y), { radius: 18, color: '#fff', weight: 3, fillOpacity: 0, className: 'search-ring' }).addTo(map);
+      setTimeout(() => ring.remove(), 4000);
+    }
+    document.getElementById('sidebar').classList.remove('open');
+  });
+
+  // Téléphone : panneau des calques repliable.
+  document.getElementById('aside-toggle').addEventListener('click', () =>
+    document.getElementById('sidebar').classList.toggle('open'));
+
   // Accès pour le module compte (account.js).
   Object.assign(KFH, { map, dot, toLatLng, markerLayer, territoryLayer, MARKER_STYLES });
   document.dispatchEvent(new Event('kfh:map-ready'));

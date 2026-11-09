@@ -219,3 +219,23 @@ aside button:disabled { opacity: .45; cursor: not-allowed; }
   background: var(--panel) var(--grain); border: 1px solid var(--accent); box-shadow: 0 6px 20px rgba(0, 0, 0, .6);
 }
 #update-bar button.link { background: none; border: 0; box-shadow: none; text-decoration: underline; color: var(--muted); }
+
+/* ───── Recherche, édition de marqueur, téléphone ───── */
+#search { width: 100%; margin-bottom: .8rem; }
+.search-ring { animation: terr-pulse 1s ease-in-out infinite; }
+.marker-popup input, .marker-popup select { display: block; width: 100%; margin: .2rem 0; background: #fffaf0; color: var(--ink); border: 1px solid #a88b5c; }
+.marker-popup label { display: block; margin: .2rem 0; }
+#aside-toggle { display: none; }
+@media (max-width: 700px) {
+  #aside-toggle { display: inline-block; }
+  header h1 { font-size: 1rem; }
+  aside#sidebar { display: none; position: absolute; z-index: 1200; top: 0; left: 0; bottom: 0; width: 85%; max-height: none; box-shadow: 8px 0 24px rgba(0, 0, 0, .6); }
+  aside#sidebar.open { display: block; }
+  main { flex-direction: row; }
+  #panel { width: 100%; }
+}
+@media (max-width: 700px) {
+  .mainnav { flex: 1; }
+  .mainnav button { max-width: none; }
+  footer { font-size: .65rem; flex-wrap: wrap; }
+}

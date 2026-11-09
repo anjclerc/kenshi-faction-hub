@@ -301,5 +301,9 @@
   "join.incoming": "Demandes d'adhésion",
   "join.accepted": "Demande acceptée : le joueur a rejoint la faction.",
   "join.declined": "Demande refusée.",
-  "err.quota_join": "Tu as déjà 5 demandes en attente."
+  "err.quota_join": "Tu as déjà 5 demandes en attente.",
+  "search.placeholder": "🔍 Rechercher un lieu, un marqueur…",
+  "nav.layers": "☰ Calques",
+  "marker.edit": "Modifier",
+  "marker.delete_confirm": "Supprimer ce marqueur ?"
 }
