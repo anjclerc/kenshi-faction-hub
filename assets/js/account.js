@@ -29,6 +29,22 @@
     const k = 'err.' + code;
     return t(k) === k ? code : t(k);
   }
+  // Confirmation intégrée au site (les fenêtres confirm() du navigateur peuvent être bloquées).
+  function askConfirm(msg) {
+    return new Promise(resolve => {
+      const box = document.createElement('div');
+      box.className = 'confirm';
+      box.innerHTML = `<div><p>${esc(msg)}</p>
+        <button data-ok class="danger">${esc(t('acc.confirm_yes'))}</button>
+        <button data-no>${esc(t('acc.confirm_no'))}</button></div>`;
+      const done = ok => { box.remove(); resolve(ok); };
+      box.querySelector('[data-ok]').onclick = () => done(true);
+      box.querySelector('[data-no]').onclick = () => done(false);
+      document.body.appendChild(box);
+      box.querySelector('[data-no]').focus();
+    });
+  }
+
   // Appel Supabase : affiche l'erreur éventuelle et renvoie null.
   async function call(promise) {
     const { data, error } = await promise;
@@ -370,7 +386,7 @@
       if (ok) { await loadProposals(); renderHeader(); renderPanel(); }
     },
     async 'cancel-vote'(btn) {
-      if (!confirm(t('vote.cancel_confirm'))) return;
+      if (!await askConfirm(t('vote.cancel_confirm'))) return;
       const ok = await call(sb.rpc('cancel_proposal', { p_proposal: +btn.dataset.id }));
       if (ok) { await loadProposals(); renderHeader(); renderPanel(); drawRaidTargets(); }
     },
@@ -378,7 +394,7 @@
       saveDraft();
       const d = state.draft;
       const kind = d.kind;
-      if (['dissolution', 'depose'].includes(kind) && !confirm(t('vote.confirm_' + kind))) return;
+      if (['dissolution', 'depose'].includes(kind) && !await askConfirm(t('vote.confirm_' + kind))) return;
       const ok = await call(sb.rpc('create_proposal', {
         p_kind: kind, p_title: d.title.trim(), p_description: d.desc.trim(),
         p_event_at: kind === 'raid' && d.date ? new Date(d.date).toISOString() : null,
@@ -451,17 +467,18 @@
       catch (e) { say(t('acc.invite_ready')); }
     },
     async kick(btn) {
-      if (!confirm(t('acc.kick_confirm'))) return;
+      if (!await askConfirm(t('acc.kick_confirm'))) return;
       const ok = await call(sb.rpc('kick_member', { p_profile: btn.dataset.member }));
       if (ok) load();
     },
     async leave() {
-      if (!confirm(t('acc.leave_confirm'))) return;
+      const last = isCreator() && state.members.length === 1;
+      if (!await askConfirm(t(last ? 'acc.leave_delete_confirm' : 'acc.leave_confirm'))) return;
       const ok = await call(sb.rpc('leave_faction'));
       if (ok) { say(t('acc.left')); load(); }
     },
     async split() {
-      if (!confirm(t('acc.split_confirm'))) return;
+      if (!await askConfirm(t('acc.split_confirm'))) return;
       const ok = await call(sb.rpc('create_faction', {
         p_name: $('#s-name').value.trim(), p_governance: $('#s-gov').value, p_parent: state.faction.id
       }));
@@ -477,7 +494,7 @@
     if (e.target.id === 'v-kind') { updateVoteForm(); return; }
     if (!e.target.matches('.m-role')) return;
     const role = e.target.value;
-    if (role === 'createur' && !confirm(t('acc.transfer_confirm'))) { renderPanel(); return; }
+    if (role === 'createur' && !await askConfirm(t('acc.transfer_confirm'))) { renderPanel(); return; }
     const ok = await call(sb.rpc('set_member_role', { p_profile: e.target.dataset.member, p_role: role }));
     if (ok) { say(t('acc.saved')); load(); }
   });

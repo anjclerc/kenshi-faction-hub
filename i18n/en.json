@@ -171,5 +171,8 @@
   "err.raid_needs_date": "Set the raid date and time.",
   "err.not_found": "Proposal not found.",
   "err.vote_closed": "This vote is closed.",
-  "err.not_allowed": "Action not allowed."
+  "err.not_allowed": "Action not allowed.",
+  "acc.confirm_yes": "Confirm",
+  "acc.confirm_no": "Cancel",
+  "acc.leave_delete_confirm": "You are the last member: if you leave, the faction will be deleted (markers, votes and invites included). Continue?"
 }

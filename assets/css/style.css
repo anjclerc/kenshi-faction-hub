@@ -112,3 +112,9 @@ header { position: relative; z-index: 2100; }  /* langue accessible au-dessus du
 #panel .status.passed { color: #7fd17f; }
 #panel .status.rejected { color: #f08080; }
 #panel [hidden] { display: none !important; }
+
+/* ───── Confirmation ───── */
+.confirm { position: fixed; inset: 0; z-index: 3000; background: rgba(0, 0, 0, .6); display: flex; align-items: center; justify-content: center; }
+.confirm > div { background: var(--panel); border: 1px solid var(--accent); padding: 1rem 1.5rem; max-width: 420px; }
+.confirm button { background: var(--bg); color: var(--text); border: 1px solid var(--accent); padding: .4rem .9rem; margin-right: .5rem; cursor: pointer; }
+.confirm button.danger { border-color: #b02a2a; color: #f0a0a0; }

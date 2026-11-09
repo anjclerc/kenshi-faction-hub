@@ -23,7 +23,8 @@ Le joueur qui l'ouvre se connecte et rejoint la faction comme **Nouveau venu**.
 Les membres (sauf Nouveaux venus) posent des marqueurs enregistrés en ligne, visibles **par la faction** ou **par tous**. L'auteur, le Créateur et l'Architecte peuvent les supprimer (clic sur le marqueur).
 
 ## Quitter / faire scission
-- **Quitter la faction** : à tout moment (le Créateur doit d'abord transmettre son rôle, sauf s'il est seul).
+- **Quitter la faction** : à tout moment. Le Créateur doit d'abord transmettre son rôle, sauf s'il est seul : dans ce cas la faction est **supprimée** (marqueurs, votes et invitations compris).
+- **Dissolution votée** : la faction est supprimée.
 - **Faire scission** : crée une nouvelle faction « issue de la scission de… » et invite ceux qui partent avec toi.
 
 ## Votes

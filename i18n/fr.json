@@ -171,5 +171,8 @@
   "err.raid_needs_date": "Indique la date et l'heure du raid.",
   "err.not_found": "Proposition introuvable.",
   "err.vote_closed": "Ce vote est terminé.",
-  "err.not_allowed": "Action non autorisée."
+  "err.not_allowed": "Action non autorisée.",
+  "acc.confirm_yes": "Confirmer",
+  "acc.confirm_no": "Annuler",
+  "acc.leave_delete_confirm": "Tu es le dernier membre : en partant, la faction sera supprimée (marqueurs, votes et invitations compris). Continuer ?"
 }
