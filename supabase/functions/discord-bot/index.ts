@@ -75,7 +75,9 @@ async function ensureRoles(secrets: any) {
   if (!ch) return null;
   const names = ROLE_NAMES[secrets.lang] ?? ROLE_NAMES.fr;
   const map: Record<string, string> = { ...(secrets.role_map ?? {}) };
-  const existing = (await discord('GET', `/guilds/${ch.guild}/roles`)).data ?? [];
+  const list = await discord('GET', `/guilds/${ch.guild}/roles`);
+  if (!list.ok) return { guild: ch.guild, map, roles: 0, error: list.status === 403 || list.status === 404 ? 'not_on_server' : 'discord_down' };
+  const existing = list.data ?? [];
   const ids = new Set(existing.map((r: any) => r.id));
   let changed = false;
   for (const [key, name] of Object.entries(names)) {
@@ -85,18 +87,19 @@ async function ensureRoles(secrets: any) {
     if (role?.id) { map[key] = role.id; changed = true; }
   }
   if (changed) await db.from('faction_secrets').update({ role_map: map }).eq('faction_id', secrets.faction_id);
-  return { guild: ch.guild, map };
+  return { guild: ch.guild, map, roles: Object.keys(map).length };
 }
 
-async function syncMember(profileId: string, factionId: string) {
-  const { data: secrets } = await db.from('faction_secrets').select('*').eq('faction_id', factionId).maybeSingle();
-  if (!secrets?.discord_channel || !TOKEN) return;
+// Résultat : ok | no_discord (jamais connecté avec Discord) | not_on_server (absent du serveur) | nick (surnom refusé) | failed
+async function syncMember(profileId: string, factionId: string, secretsIn?: any, gIn?: any): Promise<string> {
+  const secrets = secretsIn ?? (await db.from('faction_secrets').select('*').eq('faction_id', factionId).maybeSingle()).data;
+  if (!secrets?.discord_channel || !TOKEN) return 'failed';
   const { data: discordId } = await db.rpc('bot_discord_id', { p_profile: profileId });
-  if (!discordId) return;
-  const g = secrets.sync_roles ? await ensureRoles(secrets) : { guild: parseChannel(secrets.discord_channel)?.guild, map: {} };
-  if (!g?.guild) return;
+  if (!discordId) return 'no_discord';
+  const g = gIn ?? (secrets.sync_roles ? await ensureRoles(secrets) : { guild: parseChannel(secrets.discord_channel)?.guild, map: {} });
+  if (!g?.guild || g.error) return 'failed';
   const member = await discord('GET', `/guilds/${g.guild}/members/${discordId}`);
-  if (!member.ok) return;   // pas (encore) sur le serveur Discord de la faction
+  if (!member.ok) return 'not_on_server';
   const { data: m } = await db.from('memberships').select('role').eq('profile_id', profileId).eq('faction_id', factionId).maybeSingle();
   const ours = Object.values(g.map) as string[];
   const keep = (member.data.roles as string[]).filter(r => !ours.includes(r));
@@ -106,18 +109,36 @@ async function syncMember(profileId: string, factionId: string) {
     const { data: p } = await db.from('profiles').select('game_name').eq('id', profileId).maybeSingle();
     if (p?.game_name) patch.nick = p.game_name.slice(0, 32);
   }
-  if (Object.keys(patch).length) {
-    const r = await discord('PATCH', `/guilds/${g.guild}/members/${discordId}`, patch);
-    if (!r.ok && patch.nick) {   // le propriétaire du serveur ne peut pas être renommé : on réessaie sans le surnom
-      delete patch.nick;
-      if (patch.roles) await discord('PATCH', `/guilds/${g.guild}/members/${discordId}`, patch);
-    }
+  if (!Object.keys(patch).length) return 'ok';
+  const r = await discord('PATCH', `/guilds/${g.guild}/members/${discordId}`, patch);
+  if (r.ok) return 'ok';
+  if (patch.nick) {   // le propriétaire du serveur ne peut pas être renommé : on réessaie sans le surnom
+    delete patch.nick;
+    if (!patch.roles) return 'nick';
+    const r2 = await discord('PATCH', `/guilds/${g.guild}/members/${discordId}`, patch);
+    return r2.ok ? 'nick' : 'failed';
   }
+  return 'failed';
 }
 
 async function resync(factionId: string) {
-  const { data: members } = await db.from('memberships').select('profile_id').eq('faction_id', factionId);
-  for (const m of members ?? []) await syncMember(m.profile_id, factionId);
+  const { data: secrets } = await db.from('faction_secrets').select('*').eq('faction_id', factionId).maybeSingle();
+  if (!secrets?.discord_channel) return;
+  const status: Record<string, unknown> = { ok: 0, no_discord: 0, not_on_server: 0, nick: 0, failed: 0, roles: 0 };
+  if (!TOKEN) status.error = 'no_token';
+  else {
+    const g = secrets.sync_roles ? await ensureRoles(secrets) : { guild: parseChannel(secrets.discord_channel)?.guild, map: {}, roles: 0 };
+    if (g?.error) status.error = g.error;
+    else {
+      status.roles = g?.roles ?? 0;
+      const { data: members } = await db.from('memberships').select('profile_id').eq('faction_id', factionId);
+      for (const m of members ?? []) {
+        const r = await syncMember(m.profile_id, factionId, secrets, g);
+        status[r] = (status[r] as number) + 1;
+      }
+    }
+  }
+  await db.from('faction_secrets').update({ bot_status: status, bot_synced_at: new Date().toISOString() }).eq('faction_id', factionId);
 }
 
 // ───── Votes dans le salon (forum ou texte) ─────

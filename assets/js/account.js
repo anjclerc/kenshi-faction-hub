@@ -386,7 +386,18 @@
       <label class="inline"><input type="checkbox" id="w-nick" ${w.sync_nick !== false ? 'checked' : ''}> ${esc(t('bot.sync_nick'))}</label><br>
       <button data-act="save-hook">${esc(t('acc.save'))}</button>
       ${state.secrets?.discord_webhook ? `<button data-act="test-hook">${esc(t('hook.test'))}</button>` : ''}
-      ${state.secrets?.discord_channel ? `<button data-act="bot-resync">🔄 ${esc(t('bot.resync'))}</button>` : ''}`;
+      ${state.secrets?.discord_channel ? `<button data-act="bot-resync">🔄 ${esc(t('bot.resync'))}</button>
+        <div id="bot-status">${botStatusHtml()}</div>` : ''}`;
+  }
+  // Compte rendu de la dernière synchronisation (écrit par le bot).
+  function botStatusHtml() {
+    const s = state.secrets?.bot_status, at = state.secrets?.bot_synced_at;
+    if (!s || !at) return '';
+    const when = new Date(at).toLocaleString(I18N.lang);
+    if (s.error) return `<p class="error">⚠️ ${esc(when)} — ${esc(t('bot.err_' + s.error))}</p>`;
+    const rows = ['ok', 'not_on_server', 'no_discord', 'nick', 'failed'].filter(k => s[k])
+      .map(k => `<li>${k === 'ok' ? '✅' : '⚠️'} ${esc(t('bot.st_' + k).replace('{n}', s[k]))}</li>`).join('');
+    return `<p class="hint">🕓 ${esc(t('bot.last_sync'))} ${esc(when)} · ${esc(t('bot.st_roles').replace('{n}', s.roles))}</p><ul class="bot-status">${rows}</ul>`;
   }
 
   function membersHtml() {
@@ -739,7 +750,21 @@
       if (ok) { say(t('acc.saved')); state.secrets = (await sb.from('faction_secrets').select('*').maybeSingle()).data; renderPanel(); }
     },
     async 'bot-resync'() {
-      if (await call(sb.rpc('bot_resync'))) say(t('bot.resync_sent'));
+      const before = state.secrets?.bot_synced_at;
+      if (!await call(sb.rpc('bot_resync'))) return;
+      const box = $('#bot-status');
+      if (box) box.innerHTML = `<p class="hint">⏳ ${esc(t('bot.resync_sent'))}</p>`;
+      for (let i = 0; i < 15; i++) {   // le bot répond en quelques secondes
+        await new Promise(r => setTimeout(r, 2000));
+        const { data } = await sb.from('faction_secrets').select('*').maybeSingle();
+        if (data?.bot_synced_at && data.bot_synced_at !== before) {
+          state.secrets = data;
+          const b = $('#bot-status');
+          if (b) { b.innerHTML = botStatusHtml(); b.scrollIntoView({ block: 'nearest' }); }
+          return;
+        }
+      }
+      if ($('#bot-status')) $('#bot-status').innerHTML = `<p class="error">⚠️ ${esc(t('bot.no_answer'))}</p>`;
     },
     async 'test-hook'() {
       if (await call(sb.rpc('test_webhook'))) say(t('hook.test_sent'));

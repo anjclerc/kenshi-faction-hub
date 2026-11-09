@@ -325,5 +325,16 @@
   "bot.sync_roles": "Synchroniser les rôles",
   "bot.sync_nick": "Pseudo en jeu en surnom",
   "bot.resync": "Synchroniser maintenant",
-  "bot.resync_sent": "Synchronisation lancée : les rôles arrivent sur Discord dans quelques secondes."
+  "bot.resync_sent": "Synchronisation en cours…",
+  "bot.last_sync": "Dernière synchronisation :",
+  "bot.st_roles": "{n} rôles sur le serveur",
+  "bot.st_ok": "{n} membre(s) synchronisé(s)",
+  "bot.st_not_on_server": "{n} membre(s) absent(s) du serveur Discord (invite-les)",
+  "bot.st_no_discord": "{n} membre(s) jamais connecté(s) au site avec Discord",
+  "bot.st_nick": "{n} surnom(s) refusé(s) (propriétaire du serveur, ou rôle du bot trop bas)",
+  "bot.st_failed": "{n} échec(s) : place le rôle du bot au-dessus des rôles de la faction",
+  "bot.err_not_on_server": "Le bot n'est pas sur ce serveur : invite-le, puis réessaie.",
+  "bot.err_no_token": "Bot non configuré (jeton manquant) : préviens l'administrateur du site.",
+  "bot.err_discord_down": "Discord ne répond pas, réessaie plus tard.",
+  "bot.no_answer": "Pas de réponse du bot. Réessaie dans une minute."
 }

@@ -239,3 +239,5 @@ aside button:disabled { opacity: .45; cursor: not-allowed; }
   .mainnav button { max-width: none; }
   footer { font-size: .65rem; flex-wrap: wrap; }
 }
+#panel p.error { color: var(--danger); }
+ul.bot-status { margin: .2rem 0 .6rem; padding-left: 1.2rem; font-size: .9em; }

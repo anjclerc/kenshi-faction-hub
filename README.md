@@ -35,7 +35,7 @@ Un site web pour les joueurs qui jouent à Kenshi en multijoueur, avec le mod [A
 | 6 | Intégration en jeu (selon l'accord de l'auteur d'AnarchyKenshi) | 💭 |
 
 ### Héberger sa propre copie (Supabase, offre gratuite)
-1. Exécuter dans *SQL Editor*, dans l'ordre : `supabase/schema.sql`, puis `supabase/002_votes.sql` → `supabase/014_discord_bot.sql` (ordre des numéros).
+1. Exécuter dans *SQL Editor*, dans l'ordre : `supabase/schema.sql`, puis `supabase/002_votes.sql` → `supabase/015_bot_status.sql` (ordre des numéros).
 2. Mettre l'adresse et la clé publique du projet dans `assets/js/config.js`.
 3. Activer la connexion **Discord** dans Supabase (Authentication → Providers).
 4. Bot Discord (facultatif) : déployer `supabase/functions/discord-bot` — voir la page [Discord du wiki](../../wiki/Discord).
@@ -81,7 +81,7 @@ A website for players running Kenshi in multiplayer with the [AnarchyKenshi](htt
 | 6 | In-game integration (depends on the AnarchyKenshi author) | 💭 |
 
 ### Host your own copy (Supabase free tier)
-1. Run in *SQL Editor*, in order: `supabase/schema.sql`, then `supabase/002_votes.sql` → `supabase/014_discord_bot.sql` (by number).
+1. Run in *SQL Editor*, in order: `supabase/schema.sql`, then `supabase/002_votes.sql` → `supabase/015_bot_status.sql` (by number).
 2. Put the project URL and publishable key in `assets/js/config.js`.
 3. Enable the **Discord** provider in Supabase (Authentication → Providers).
 4. Discord bot (optional): deploy `supabase/functions/discord-bot` — see the wiki [Discord page](../../wiki/Discord) (French).

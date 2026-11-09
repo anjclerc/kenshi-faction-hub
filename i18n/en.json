@@ -325,5 +325,16 @@
   "bot.sync_roles": "Sync roles",
   "bot.sync_nick": "In-game name as nickname",
   "bot.resync": "Sync now",
-  "bot.resync_sent": "Sync started: roles will appear on Discord in a few seconds."
+  "bot.resync_sent": "Syncing…",
+  "bot.last_sync": "Last sync:",
+  "bot.st_roles": "{n} roles on the server",
+  "bot.st_ok": "{n} member(s) synced",
+  "bot.st_not_on_server": "{n} member(s) not on the Discord server (invite them)",
+  "bot.st_no_discord": "{n} member(s) never signed in to the site with Discord",
+  "bot.st_nick": "{n} nickname(s) refused (server owner, or bot role too low)",
+  "bot.st_failed": "{n} failure(s): move the bot's role above the faction roles",
+  "bot.err_not_on_server": "The bot is not on this server: invite it, then try again.",
+  "bot.err_no_token": "Bot not configured (missing token): tell the site admin.",
+  "bot.err_discord_down": "Discord is not responding, try again later.",
+  "bot.no_answer": "No answer from the bot. Try again in a minute."
 }
