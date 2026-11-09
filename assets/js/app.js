@@ -90,31 +90,39 @@ const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g,
     o.value = t; o.dataset.i18n = 'marker.' + t;
     typeSelect.appendChild(o);
   }
-  let placing = false;
-  document.getElementById('marker-place').addEventListener('click', () => {
-    placing = true;
-    document.getElementById('marker-hint').textContent = I18N.t('marker.click');
+  // 1. Clic sur la carte : position retenue (cercle en pointillés) + coordonnées affichées.
+  // 2. Bouton « Placer le marqueur ici » : le marqueur est posé à cette position.
+  const placeBtn = document.getElementById('marker-place');
+  const out = document.getElementById('marker-json');
+  const hint = document.getElementById('marker-hint');
+  let pending = null, preview = null;
+  const clearPending = () => { preview?.remove(); preview = null; pending = null; placeBtn.disabled = true; };
+  clearPending();
+
+  map.on('click', e => {
+    const p = toPixel(e.latlng);
+    if (p.x < 0 || p.y < 0 || p.x > config.size || p.y > config.size) return;  // hors de la carte
+    if (KFH.onPick) { const pick = KFH.onPick; KFH.onPick = null; pick(p); return; }  // choix d'un point (raid, territoire)
+    pending = p;
+    preview?.remove();
+    preview = L.circleMarker(e.latlng, { radius: 10, color: '#fff', weight: 2, dashArray: '3 3', fillOpacity: 0 }).addTo(map);
+    out.value = `"x": ${p.x}, "y": ${p.y}`;
+    hint.textContent = I18N.t('marker.confirm_hint');
+    placeBtn.disabled = false;
   });
 
-  map.on('click', async e => {
-    const p = toPixel(e.latlng);
-    const out = document.getElementById('marker-json');
-    if (p.x < 0 || p.y < 0 || p.x > config.size || p.y > config.size) return;  // hors de la carte
-    if (KFH.onPick) { const pick = KFH.onPick; KFH.onPick = null; pick(p); return; }  // choix d'un point (cible de raid)
-    if (!placing) {
-      out.value = `"x": ${p.x}, "y": ${p.y}`;
-      return;
-    }
-    placing = false;
+  placeBtn.addEventListener('click', async () => {
+    if (!pending) { hint.textContent = I18N.t('marker.click_first'); return; }
     const m = {
       name: document.getElementById('marker-name').value || I18N.t('marker.' + typeSelect.value),
-      type: typeSelect.value, x: p.x, y: p.y
+      type: typeSelect.value, x: pending.x, y: pending.y
     };
-    const hint = document.getElementById('marker-hint');
-    // Connecté avec une faction : le module compte enregistre le marqueur en ligne.
+    clearPending();
+    // Connecté avec une faction (ou indépendant) : le module compte enregistre le marqueur en ligne.
     if (KFH.onMarkerPlaced && await KFH.onMarkerPlaced(m)) {
       out.value = '';
       hint.textContent = I18N.t('marker.saved');
+      document.getElementById('marker-name').value = '';
       return;
     }
     addMarker(m);

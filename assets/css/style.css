@@ -210,3 +210,4 @@ header h1 { font-size: 1.15rem; }
 .terr-enemy { animation: terr-pulse 2.2s ease-in-out infinite; }
 @keyframes terr-pulse { 0%, 100% { stroke-opacity: 1; stroke-width: 3; } 50% { stroke-opacity: .35; stroke-width: 6; } }
 @media (prefers-reduced-motion: reduce) { .terr-enemy { animation: none; } }
+aside button:disabled { opacity: .45; cursor: not-allowed; }

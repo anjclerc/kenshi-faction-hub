@@ -1,7 +1,7 @@
 {
   "lang.label": "Language",
   "layers.title": "Layers",
-  "map.hint": "Click on the map to get coordinates.",
+  "map.hint": "Click on the map to choose where the marker goes.",
   "footer.credit": "An idea by Akumetsu, built with Claude.",
   "footer.disclaimer": "Kenshi © Lo-Fi Games. Unofficial fan project.",
   "layers.place.town": "Towns",
@@ -13,7 +13,7 @@
   "layers.markers": "Player markers",
   "marker.title": "Add a marker",
   "marker.name": "Name (optional)",
-  "marker.place": "Place on the map",
+  "marker.place": "📍 Place the marker here",
   "marker.click": "Click on the map where you want it.",
   "marker.copy": "Marker placed. Copy this line into data/markers.json (online saving coming soon).",
   "marker.own_base": "Our base",
@@ -284,5 +284,7 @@
   "terr.kind_neutral": "⚪ Neutral",
   "terr.kind_danger": "☠️ Danger",
   "terr.danger": "☠️ danger",
-  "terr.visibility": "Who sees this zone"
+  "terr.visibility": "Who sees this zone",
+  "marker.confirm_hint": "Position selected (white circle). Click “Place the marker here” to confirm, or elsewhere on the map to change it.",
+  "marker.click_first": "First click on the map where you want it."
 }

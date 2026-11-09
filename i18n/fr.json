@@ -1,7 +1,7 @@
 {
   "lang.label": "Langue",
   "layers.title": "Calques",
-  "map.hint": "Clique sur la carte pour obtenir les coordonnées.",
+  "map.hint": "Clique sur la carte pour choisir l'emplacement du marqueur.",
   "footer.credit": "Une idée de Akumetsu, créée avec Claude.",
   "footer.disclaimer": "Kenshi © Lo-Fi Games. Projet de fans non officiel.",
   "layers.place.town": "Villes",
@@ -13,7 +13,7 @@
   "layers.markers": "Marqueurs des joueurs",
   "marker.title": "Ajouter un marqueur",
   "marker.name": "Nom (optionnel)",
-  "marker.place": "Placer sur la carte",
+  "marker.place": "📍 Placer le marqueur ici",
   "marker.click": "Clique sur la carte à l'endroit voulu.",
   "marker.copy": "Marqueur placé. Copie cette ligne dans data/markers.json (sauvegarde en ligne à venir).",
   "marker.own_base": "Notre base",
@@ -284,5 +284,7 @@
   "terr.kind_neutral": "⚪ Neutre",
   "terr.kind_danger": "☠️ Danger",
   "terr.danger": "☠️ danger",
-  "terr.visibility": "Qui voit cette zone"
+  "terr.visibility": "Qui voit cette zone",
+  "marker.confirm_hint": "Position choisie (cercle blanc). Clique sur « Placer le marqueur ici » pour valider, ou ailleurs sur la carte pour changer.",
+  "marker.click_first": "Clique d'abord sur la carte à l'endroit voulu."
 }

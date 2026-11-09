@@ -31,7 +31,8 @@ Conversion monde → carte : `pixel = (coordonnée monde + 147456) / 36` (monde 
 Types : Notre base, Cité alliée, Base alliée, Base ennemie, Zone de loot, Ressources, Danger, Autre.
 
 1. Dans le panneau **Ajouter un marqueur**, choisis le type et un nom.
-2. Clique sur **Placer sur la carte**, puis sur l'endroit voulu.
+2. **Clique sur la carte** à l'endroit voulu : un cercle blanc en pointillés marque la position (clique ailleurs pour la changer).
+3. Clique sur **📍 Placer le marqueur ici** pour valider.
 3. Copie la ligne affichée dans `data/markers.json` et fais une Pull Request.
 
 > À l'étape 2 (comptes), les marqueurs seront enregistrés en ligne directement, avec des droits selon le rôle.
