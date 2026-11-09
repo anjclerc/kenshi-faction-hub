@@ -1,10 +1,12 @@
 // Mini i18n : charge i18n/<lang>.json et remplit les éléments [data-i18n].
+// Même numéro de version que les scripts (?v=…) : évite une ancienne traduction en cache.
+const ASSET_VERSION = (document.currentScript?.src.match(/[?&]v=([^&]+)/) ?? [])[1] ?? Date.now();
 const I18N = {
   lang: 'fr',
   dict: {},
 
   async load(lang) {
-    const res = await fetch(`i18n/${lang}.json`);
+    const res = await fetch(`i18n/${lang}.json?v=${ASSET_VERSION}`);
     this.dict = await res.json();
     this.lang = lang;
     document.documentElement.lang = lang;
