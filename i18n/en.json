@@ -254,5 +254,10 @@
   "err.quota_proposals": "Too many open votes (30 max).",
   "err.quota_invites": "Too many active invites (50 max).",
   "err.quota_hires": "Too many pending requests (20 max).",
-  "err.quota_factions": "The maximum number of factions has been reached."
+  "err.quota_factions": "The maximum number of factions has been reached.",
+  "nav.map": "Map",
+  "preview.label": "View the site as:",
+  "preview.none": "— me (Founder) —",
+  "preview.banner": "Preview (display only) as",
+  "preview.stop": "Stop preview"
 }

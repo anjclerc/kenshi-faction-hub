@@ -37,6 +37,17 @@ header h1 { margin: 0; font-size: 1.35rem; color: var(--accent); text-shadow: 0 
 header h1::before { content: '◈ '; color: var(--accent-2); }
 footer { font-size: .75rem; justify-content: center; gap: .3rem; color: var(--muted); border-top: 1px solid var(--line); }
 nav { display: flex; align-items: center; gap: .5rem; }
+header { gap: 1rem; justify-content: flex-start; }
+header h1 { white-space: nowrap; }
+#auth { flex: 1; display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.mainnav { display: flex; gap: .3rem; flex-wrap: wrap; }
+.mainnav button { border-radius: 3px; }
+.mainnav button.active { background: linear-gradient(var(--accent), #a76a22); color: var(--ink); border-color: var(--accent); }
+.who { margin-left: auto; color: var(--muted); font-size: .85rem; white-space: nowrap; }
+.who button.link, button.link { background: none; border: 0; box-shadow: none; text-decoration: underline; color: var(--muted); padding: 0 .3rem; }
+header .lang { white-space: nowrap; }
+#panel .preview { background: rgba(200, 134, 46, .15); border: 1px dashed var(--accent); padding: .3rem .6rem; margin: 0 1.6rem .6rem 0; }
+#panel .preview-pick { color: var(--muted); }
 
 /* ───── Boutons & champs ───── */
 button, a.button, #auth button {
@@ -84,6 +95,10 @@ aside textarea { font-family: monospace; font-size: .75rem; resize: vertical; }
 .leaflet-control-attribution { background: rgba(23, 19, 14, .75) !important; color: var(--muted); }
 .leaflet-control-attribution a { color: var(--accent); }
 
+@media (max-width: 900px) {
+  header { flex-wrap: wrap; }
+  #auth { order: 3; flex-basis: 100%; }
+}
 @media (max-width: 700px) {
   main { flex-direction: column; }
   aside { width: 100%; max-height: 35vh; border-right: 0; border-bottom: 1px solid var(--line); }
@@ -96,7 +111,7 @@ aside textarea { font-family: monospace; font-size: .75rem; resize: vertical; }
   border-left: 3px double var(--accent-2); box-shadow: -8px 0 24px rgba(0, 0, 0, .5);
 }
 #panel[hidden], #panel [hidden] { display: none !important; }
-#panel-close { position: absolute; top: .4rem; right: .5rem; background: none; border: 0; box-shadow: none; color: var(--muted); font-size: 1.4rem; }
+#panel-close { position: sticky; float: right; top: 0; margin: -.6rem -.5rem 0 0; background: none; border: 0; box-shadow: none; color: var(--muted); font-size: 1.4rem; }
 #panel-close:hover { color: var(--accent); }
 #panel h2 { font-size: 1.15rem; color: var(--accent); margin: 1.1rem 0 .4rem; border-bottom: 1px solid var(--line); padding-bottom: .2rem; }
 #panel h3 { font-size: 1rem; margin: 1rem 0 .3rem; color: var(--paper); }
@@ -173,3 +188,13 @@ table.members select { width: auto !important; }
 }
 .confirm button { margin-right: .5rem; }
 .confirm button.danger { border-color: var(--danger); color: #f2b39c; }
+
+/* ───── Barre de navigation compacte ───── */
+[hidden] { display: none !important; }
+header h1 { font-size: 1.15rem; }
+.mainnav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.mainnav button { font-size: .8rem; padding: .3rem .55rem; white-space: nowrap; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; }
+#auth .who button.link { background: none; border: 0; box-shadow: none; text-decoration: underline; color: var(--muted); padding: 0 .3rem; font-size: .8rem; }
+#auth .who button.link:hover { color: var(--accent); }
+#panel .preview { margin-right: 1.8rem; }
+#auth .mainnav button.active { background: linear-gradient(var(--accent), #a76a22); color: var(--ink); border-color: var(--accent); }

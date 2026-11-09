@@ -8,7 +8,7 @@
   const SITE = location.origin + location.pathname;
 
   const state = { user: null, profile: null, membership: null, faction: null, parent: null, members: [], history: [], invite: null, inviteInfo: null,
-    tab: 'faction', proposals: [], myVotes: {}, draft: {},
+    tab: 'faction', previewRole: null, proposals: [], myVotes: {}, draft: {},
     mercs: [], myMerc: null, hires: [], hireDraft: {},
     relations: [], factions: [], independents: [] };
   const dbMarkers = [];
@@ -18,13 +18,15 @@
   const t = k => I18N.t(k);
   const esc = s => String(s ?? '').replace(/[&<>"']/g,
     c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const isCreator = () => state.membership?.role === 'createur';
+  // Rôle effectif : le Créateur peut prévisualiser le site « comme » un autre rôle (affichage seulement).
+  const myRole = () => state.previewRole ?? state.membership?.role;
+  const isCreator = () => myRole() === 'createur';
   // Gestionnaire : le Créateur ; en faction démocratique, le Chef aussi.
-  const isManager = () => isCreator() || (state.membership?.role === 'chef' && state.faction?.governance === 'democratic');
+  const isManager = () => isCreator() || (myRole() === 'chef' && state.faction?.governance === 'democratic');
   const isSolo = () => !state.faction && !!state.profile?.solo;
   const myParty = () => state.faction ? 'f:' + state.faction.id : 'p:' + state.user?.id;
-  const canDiplo = () => !state.faction || isManager() || state.membership?.role === 'diplomate';
-  const canHire = () => !state.faction || ['createur', 'chef', 'diplomate'].includes(state.membership?.role);
+  const canDiplo = () => !state.faction || isManager() || myRole() === 'diplomate';
+  const canHire = () => !state.faction || ['createur', 'chef', 'diplomate'].includes(myRole());
 
   function say(msg, isError = false) {
     const el = $('#panel-msg');
@@ -148,7 +150,7 @@
     state.proposals = pr.data ?? [];
     state.myVotes = Object.fromEntries((v.data ?? []).map(x => [x.proposal_id, x.choice]));
   }
-  const canVote = () => !!state.faction && state.faction.voting_roles.includes(state.membership.role);
+  const canVote = () => !!state.faction && state.faction.voting_roles.includes(myRole());
   const openProposals = () => state.proposals.filter(p => p.status === 'open');
   const memberName = id => {
     const m = state.members.find(x => x.profile_id === id);
@@ -165,10 +167,27 @@
       const who = state.profile?.game_name || state.profile?.discord_name || '?';
       const todo = openProposals().filter(p => !state.myVotes[p.id]).length;
       const pending = state.hires.filter(h => h.mercenary_id === state.user.id && h.status === 'pending').length;
-      el.innerHTML = `<button data-act="open">${esc(who)} · ${esc(state.faction?.name ?? t(isSolo() ? 'merc.solo' : 'acc.no_faction'))}</button>
-        ${state.faction ? `<button data-act="open-votes">${esc(t('vote.tab'))}${canVote() && todo ? ` <b class="badge">${todo}</b>` : ''}</button>` : ''}
-        ${state.faction || isSolo() ? `<button data-act="open-mercs">${esc(t('merc.tab'))}${pending ? ` <b class="badge">${pending}</b>` : ''}</button>` : ''}
-        <button data-act="logout">${esc(t('acc.logout'))}</button>`;
+      const incoming = state.relations.filter(r => r.to_party === myParty() && r.stance === 'ally' &&
+        !state.relations.some(x => x.from_party === myParty() && x.to_party === r.from_party && x.stance === 'ally')).length;
+      if (state.faction || isSolo()) {
+        const open = !$('#panel').hidden && !$('#panel').classList.contains('gate');
+        const items = [['map', '🗺️ ' + t('nav.map'), 0],
+          ['faction', (state.faction ? '🛡️ ' + state.faction.name : '👤 ' + t('acc.profile')), 0],
+          ...(state.faction ? [['votes', '⚖️ ' + t('vote.tab'), canVote() ? todo : 0]] : []),
+          ['diplo', '🤝 ' + t('diplo.tab'), canDiplo() ? incoming : 0],
+          ['mercs', '🗡️ ' + t('merc.tab'), pending]];
+        el.innerHTML = `<nav class="mainnav">${items.map(([k, label, n]) => {
+            const active = k === 'map' ? !open : open && state.tab === k;
+            return `<button data-act="nav" data-tab="${k}" class="${active ? 'active' : ''}">${esc(label)}${n ? ` <b class="badge">${n}</b>` : ''}</button>`;
+          }).join('')}</nav>
+          <span class="who">${esc(who)}${state.previewRole ? ` · 👁 ${esc(t('role.' + state.previewRole))}` : ''}
+            <button data-act="logout" class="link">${esc(t('acc.logout'))}</button></span>`;
+        $('#marker-visibility').hidden = !canPlaceMarker();
+        $('#marker-main-label').hidden = !canPlaceMarker();
+        return;
+      }
+      // Connecté sans faction (portail affiché) : seulement la déconnexion.
+      el.innerHTML = `<span class="who">${esc(who)} <button data-act="logout" class="link">${esc(t('acc.logout'))}</button></span>`;
     }
     $('#marker-visibility').hidden = !canPlaceMarker();
     $('#marker-main-label').hidden = !canPlaceMarker();
@@ -199,7 +218,7 @@
     }
     if (needName) {
       body.innerHTML = `<h1>${esc(t('gate.welcome'))}</h1>
-        ${state.faction ? `<p>${esc(t('gate.joined_as'))} <b>${esc(state.faction.name)}</b> (${esc(t('role.' + state.membership.role))}).</p>` : ''}
+        ${state.faction ? `<p>${esc(t('gate.joined_as'))} <b>${esc(state.faction.name)}</b> (${esc(t('role.' + myRole()))}).</p>` : ''}
         <h2>${esc(t('gate.step_profile'))}</h2>${profileFields()}
         <button data-act="finish-profile" class="big">${esc(t('gate.enter'))}</button>`;
       return;
@@ -213,9 +232,8 @@
     }
     const tabList = state.faction ? ['faction', 'votes', 'diplo', 'mercs'] : ['faction', 'diplo', 'mercs'];
     if (!tabList.includes(state.tab)) state.tab = 'faction';
-    const label = { faction: state.faction ? 'vote.tab_faction' : 'acc.profile', votes: 'vote.tab', diplo: 'diplo.tab', mercs: 'merc.tab' };
-    const tabs = `<nav class="tabs">${tabList.map(k =>
-      `<button data-act="tab" data-tab="${k}" class="${state.tab === k ? 'active' : ''}">${esc(t(label[k]))}</button>`).join('')}</nav>`;
+    const tabs = state.previewRole ? `<p class="preview">👁 ${esc(t('preview.banner'))} <b>${esc(t('role.' + state.previewRole))}</b>
+      <button data-act="preview" data-role="" class="small">${esc(t('preview.stop'))}</button></p>` : '';
     const content = state.tab === 'votes' ? votesHtml()
       : state.tab === 'diplo' ? diploHtml()
       : state.tab === 'mercs' ? mercsHtml()
@@ -272,12 +290,17 @@
     const discord = /^https:\/\/(discord\.gg|discord\.com\/invite)\//.test(f.discord_invite ?? '')
       ? `<a class="button discord" href="${esc(f.discord_invite)}" target="_blank" rel="noopener">${esc(t('acc.join_discord'))}</a>` : '';
     let html = `<h2><i class="swatch" style="background:${esc(f.color)}"></i> ${esc(f.name)}</h2>
-      <p class="hint">${esc(t('gov.' + f.governance))} · ${esc(t('acc.my_role'))} : ${esc(t('role.' + state.membership.role))}
+      <p class="hint">${esc(t('gov.' + f.governance))} · ${esc(t('acc.my_role'))} : ${esc(t('role.' + myRole()))}
       ${state.parent ? ` · ${esc(t('acc.split_from'))} ${esc(state.parent.name)}` : ''}</p>
       ${(f.tags ?? []).length ? `<p>${f.tags.map(x => `<span class="chip">${esc(t('tag.' + x))}</span>`).join(' ')}</p>` : ''}
       ${f.description ? `<p class="desc">${esc(f.description)}</p>` : ''}
       ${discord}`;
 
+    if (state.membership.role === 'createur') {
+      html += `<label class="preview-pick">👁 ${esc(t('preview.label'))} <select id="preview-role">
+        <option value="">${esc(t('preview.none'))}</option>${ROLES.filter(r => r !== 'createur').map(r =>
+          `<option value="${r}" ${state.previewRole === r ? 'selected' : ''}>${esc(t('role.' + r))}</option>`).join('')}</select></label>`;
+    }
     if (isManager()) html += manageHtml(f);
     html += membersHtml();
 
@@ -356,7 +379,7 @@
       const btn = (c, label) => `<button data-act="vote" data-id="${p.id}" data-choice="${c}" class="${mine === c ? 'active' : ''}">${label}</button>`;
       footer = `<p class="hint">${esc(t('vote.closes_in'))} ${esc(timeLeft(p.closes_at))} · ${counts}</p>
         ${canVote() ? btn('yes', esc(t('vote.yes'))) + btn('no', esc(t('vote.no'))) + btn('abstain', esc(t('vote.abstain'))) : `<p class="hint">${esc(t('vote.no_right'))}</p>`}
-        ${p.created_by === state.user.id || state.membership.role === 'createur'
+        ${p.created_by === state.user.id || myRole() === 'createur'
           ? `<button data-act="cancel-vote" data-id="${p.id}" class="link">${esc(t('vote.cancel'))}</button>` : ''}`;
     } else {
       footer = `<p class="status ${p.status}">${esc(t('vote.status_' + p.status))} · ${counts}</p>`;
@@ -539,8 +562,18 @@
       say('');
       load();
     },
-    open() { state.tab = 'faction'; renderPanel(); $('#panel').hidden = false; },
-    'open-votes'() { state.tab = 'votes'; renderPanel(); $('#panel').hidden = false; },
+    nav(btn) {
+      const tab = btn.dataset.tab;
+      const open = !$('#panel').hidden;
+      saveDraft(); saveHireDraft();
+      if (tab === 'map' || (open && state.tab === tab)) { $('#panel').hidden = true; }
+      else { state.tab = tab; renderPanel(); $('#panel').hidden = false; $('#panel').scrollTop = 0; }
+      renderHeader();
+    },
+    preview(btn) {
+      state.previewRole = btn.dataset.role || null;
+      renderHeader(); renderPanel(); loadMarkers();
+    },
     async 'd-ally'(btn) {
       const r = state.relations.find(x => x.from_party === myParty() && x.to_party === btn.dataset.party);
       await relation(btn.dataset.party, 'ally', r?.stance === 'ally' ? r.share : 'main');
@@ -549,7 +582,6 @@
     async 'd-enemy'(btn) {
       if (await askConfirm(t('diplo.enemy_confirm'))) await relation(btn.dataset.party, 'enemy');
     },
-    'open-mercs'() { state.tab = 'mercs'; renderPanel(); $('#panel').hidden = false; },
     async 'go-solo'() {
       if (!await saveProfileFromForm()) return;
       const ok = await call(sb.from('profiles').update({ solo: true }).eq('id', state.user.id));
@@ -588,7 +620,6 @@
       const ok = await call(sb.rpc('answer_hire', { p_request: +btn.dataset.id, p_status: btn.dataset.status }));
       if (ok) { await loadMercs(); renderHeader(); renderPanel(); }
     },
-    tab(btn) { saveDraft(); saveHireDraft(); state.tab = btn.dataset.tab; renderPanel(); },
     async vote(btn) {
       const ok = await call(sb.rpc('cast_vote', { p_proposal: +btn.dataset.id, p_choice: btn.dataset.choice }));
       if (ok) { await loadProposals(); renderHeader(); renderPanel(); }
@@ -628,6 +659,7 @@
     },
     'show-target'(btn) {
       $('#panel').hidden = true;
+      renderHeader();
       KFH.map.flyTo(KFH.toLatLng(+btn.dataset.x, +btn.dataset.y), 4);
     },
     async 'save-profile'() {
@@ -701,6 +733,11 @@
   });
   document.addEventListener('change', async e => {
     if (e.target.id === 'v-kind') { updateVoteForm(); return; }
+    if (e.target.id === 'preview-role') {
+      state.previewRole = e.target.value || null;
+      renderHeader(); renderPanel(); loadMarkers();
+      return;
+    }
     if (e.target.matches('.d-share')) { await relation(e.target.dataset.party, 'ally', e.target.value); return; }
     if (!e.target.matches('.m-role')) return;
     const role = e.target.value;
@@ -708,17 +745,17 @@
     const ok = await call(sb.rpc('set_member_role', { p_profile: e.target.dataset.member, p_role: role }));
     if (ok) { say(t('acc.saved')); load(); }
   });
-  $('#panel-close').addEventListener('click', () => { $('#panel').hidden = true; });
+  $('#panel-close').addEventListener('click', () => { $('#panel').hidden = true; renderHeader(); });
 
   // ───────── Marqueurs en ligne ─────────
   function canPlaceMarker() {
-    return (!!state.faction && state.membership.role !== 'nouveau') || isSolo();
+    return (!!state.faction && myRole() !== 'nouveau') || isSolo();
   }
   function canDelete(m) {
     if (!state.user) return false;
     if (!m.faction_id) return m.created_by === state.user.id;   // point de chute personnel
     return m.faction_id === state.faction?.id &&
-      (m.created_by === state.user.id || ['createur', 'chef', 'architecte'].includes(state.membership.role));
+      (m.created_by === state.user.id || ['createur', 'chef', 'architecte'].includes(myRole()));
   }
 
   async function loadMarkers() {

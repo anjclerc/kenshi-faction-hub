@@ -254,5 +254,10 @@
   "err.quota_proposals": "Trop de votes en cours (30 max).",
   "err.quota_invites": "Trop d'invitations actives (50 max).",
   "err.quota_hires": "Trop de demandes en attente (20 max).",
-  "err.quota_factions": "Le nombre maximal de factions est atteint."
+  "err.quota_factions": "Le nombre maximal de factions est atteint.",
+  "nav.map": "Carte",
+  "preview.label": "Voir le site comme :",
+  "preview.none": "— moi (Créateur) —",
+  "preview.banner": "Aperçu (affichage seulement) en tant que",
+  "preview.stop": "Quitter l'aperçu"
 }
