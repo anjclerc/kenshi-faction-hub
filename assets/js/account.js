@@ -84,26 +84,52 @@
   }
 
   // ───────── Panneau ─────────
+  // Portail : page de connexion, puis pseudo + créer/rejoindre une faction, avant d'accéder à la carte.
   function renderPanel() {
     const body = $('#panel-body');
+    const gate = !state.user || !state.faction;
+    $('#panel').classList.toggle('gate', gate);
+    $('#panel-close').hidden = gate;
+    if (gate) $('#panel').hidden = false;
+
     if (!state.user) {
-      body.innerHTML = `<h2>${esc(t('acc.title'))}</h2>
-        ${state.invite ? `<p>${esc(t('acc.invite_login'))}</p>` : ''}
-        <button data-act="login" class="discord">${esc(t('acc.login'))}</button>`;
+      body.innerHTML = `<h1>Kenshi Faction Hub</h1>
+        <p class="tagline">${esc(t('gate.tagline'))}</p>
+        <ul class="features"><li>${esc(t('gate.f_map'))}</li><li>${esc(t('gate.f_faction'))}</li><li>${esc(t('gate.f_diplo'))}</li></ul>
+        ${state.invite ? `<p class="invite-note">${esc(t('acc.invite_login'))}</p>` : ''}
+        <button data-act="login" class="discord big">${esc(t('acc.login'))}</button>
+        <p class="hint">${esc(t('footer.credit'))}</p>`;
       return;
     }
-    body.innerHTML = profileHtml() + (state.faction ? factionHtml() : noFactionHtml());
+    if (!state.faction) {
+      body.innerHTML = `<h1>${esc(t('gate.welcome'))}</h1>
+        <h2>1. ${esc(t('gate.step_profile'))}</h2>${profileFields()}
+        <h2>2. ${esc(t('gate.step_faction'))}</h2>${noFactionHtml()}
+        <button data-act="logout" class="link">${esc(t('acc.logout'))}</button>`;
+      return;
+    }
+    body.innerHTML = profileHtml() + factionHtml();
   }
 
-  function profileHtml() {
+  function profileFields() {
     const p = state.profile ?? {};
+    return `<label>${esc(t('acc.game_name'))} <input id="p-game" maxlength="40" value="${esc(p.game_name)}"></label>
+      <label>${esc(t('acc.discord_name'))} <input id="p-discord" maxlength="40" value="${esc(p.discord_name)}"></label>`;
+  }
+  function profileHtml() {
     const old = state.history.map(h => esc(h.old_name)).join(', ');
-    return `<h2>${esc(t('acc.profile'))}</h2>
-      <label>${esc(t('acc.game_name'))} <input id="p-game" maxlength="40" value="${esc(p.game_name)}"></label>
+    return `<h2>${esc(t('acc.profile'))}</h2>${profileFields()}
       <p class="hint">${esc(t('acc.game_name_hint'))}</p>
-      <label>${esc(t('acc.discord_name'))} <input id="p-discord" maxlength="40" value="${esc(p.discord_name)}"></label>
       <button data-act="save-profile">${esc(t('acc.save'))}</button>
       ${old ? `<p class="hint">${esc(t('acc.old_names'))} : ${old}</p>` : ''}`;
+  }
+  // Enregistre le profil saisi dans le portail (pseudo en jeu obligatoire).
+  async function saveProfileFromForm() {
+    const game = $('#p-game').value.trim();
+    if (!game) { say(t('err.game_name_required'), true); $('#p-game').focus(); return false; }
+    return !!await call(sb.from('profiles').update({
+      game_name: game, discord_name: $('#p-discord').value.trim()
+    }).eq('id', state.user.id));
   }
 
   function governanceOptions(selected) {
@@ -112,14 +138,16 @@
   }
 
   function noFactionHtml() {
-    return `<h2>${esc(t('acc.join_title'))}</h2>
+    const join = `<div class="choice"><h3>${esc(t('acc.join_title'))}</h3>
       <label>${esc(t('acc.invite_code'))} <input id="j-code" value="${esc(state.invite)}"></label>
-      <button data-act="join">${esc(t('acc.join'))}</button>
-      <h2>${esc(t('acc.create_title'))}</h2>
+      <p class="hint">${esc(t('gate.join_hint'))}</p>
+      <button data-act="join">${esc(t('acc.join'))}</button></div>`;
+    const create = `<div class="choice"><h3>${esc(t('acc.create_title'))}</h3>
       <label>${esc(t('acc.faction_name'))} <input id="c-name" maxlength="40"></label>
       <label>${esc(t('acc.governance'))} <select id="c-gov">${governanceOptions('authoritarian')}</select></label>
       <p class="hint">${esc(t('acc.governance_hint'))}</p>
-      <button data-act="create">${esc(t('acc.create'))}</button>`;
+      <button data-act="create">${esc(t('acc.create'))}</button></div>`;
+    return `<div class="choices">${state.invite ? join + create : create + join}</div>`;
   }
 
   function factionHtml() {
@@ -195,12 +223,17 @@
       if (ok) { say(t('acc.saved')); load(); }
     },
     async create() {
+      if (!await saveProfileFromForm()) return;
       const ok = await call(sb.rpc('create_faction', { p_name: $('#c-name').value.trim(), p_governance: $('#c-gov').value }));
-      if (ok) { say(t('acc.created')); load(); }
+      if (ok) { say(t('acc.created')); await load(); $('#panel').hidden = true; }
     },
     async join() {
-      const ok = await call(sb.rpc('join_faction', { p_code: $('#j-code').value.trim() }));
-      if (ok) { state.invite = null; sessionStorage.removeItem('kfh-invite'); say(t('acc.joined')); load(); }
+      if (!await saveProfileFromForm()) return;
+      let code = $('#j-code').value.trim();
+      const m = code.match(/[?&]invite=([^&#]+)/);   // lien complet collé au lieu du code
+      if (m) code = decodeURIComponent(m[1]);
+      const ok = await call(sb.rpc('join_faction', { p_code: code }));
+      if (ok) { state.invite = null; sessionStorage.removeItem('kfh-invite'); say(t('acc.joined')); await load(); $('#panel').hidden = true; }
     },
     async 'save-faction'() {
       const roles = [...document.querySelectorAll('input[name=vote-role]:checked')].map(i => i.value);
@@ -318,7 +351,5 @@
   document.addEventListener('kfh:lang', () => { renderHeader(); renderPanel(); });
   document.addEventListener('kfh:map-ready', loadMarkers);
 
-  load().then(() => {
-    if (state.invite && !state.faction) $('#panel').hidden = false;
-  });
+  load();
 })();

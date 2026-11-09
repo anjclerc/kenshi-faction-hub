@@ -103,5 +103,14 @@
   "err.use_leave_faction": "Utilise « Quitter la faction ».",
   "err.name_taken": "Ce nom de faction est déjà pris.",
   "err.invalid_value": "Valeur invalide (vérifie le nom, la couleur ou le lien Discord).",
-  "err.login_failed": "La connexion Discord a échoué. Réessaie ; si ça continue, préviens l'administrateur du site."
+  "err.login_failed": "La connexion Discord a échoué. Réessaie ; si ça continue, préviens l'administrateur du site.",
+  "gate.tagline": "Gérez votre faction pour Kenshi en multijoueur.",
+  "gate.f_map": "🗺️ Carte interactive du monde, avec vos bases, alliés, ennemis et zones de loot",
+  "gate.f_faction": "🛡️ Membres, rôles, invitations et Discord de votre faction",
+  "gate.f_diplo": "⚖️ Diplomatie, votes et raids (bientôt)",
+  "gate.welcome": "Bienvenue, vagabond !",
+  "gate.step_profile": "Ton personnage",
+  "gate.step_faction": "Ta faction",
+  "gate.join_hint": "Colle le code ou le lien reçu de ton chef de faction.",
+  "err.game_name_required": "Indique ton pseudo en jeu."
 }

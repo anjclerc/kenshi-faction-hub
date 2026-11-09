@@ -77,3 +77,24 @@ main { position: relative; }
 table.members { width: 100%; border-collapse: collapse; font-size: .85rem; }
 table.members th, table.members td { text-align: left; padding: .25rem; border-bottom: 1px solid #444; }
 table.members select { width: auto !important; }
+
+/* ───── Portail (connexion + choix de faction) ───── */
+#panel.gate {
+  position: fixed; inset: 0; width: auto; z-index: 2000; border: 0;
+  background: rgba(20, 18, 15, .88); backdrop-filter: blur(4px);
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  padding: 6vh 1rem;
+}
+#panel.gate #panel-body, #panel.gate #panel-msg { width: min(640px, 100%); }
+#panel.gate #panel-body { background: var(--panel); border: 1px solid var(--accent); padding: 1.5rem 2rem; }
+#panel.gate h1 { color: var(--accent); margin-top: 0; }
+#panel.gate .tagline { font-size: 1.1rem; }
+#panel.gate .features { line-height: 1.8; }
+#panel.gate .invite-note { color: #7fd17f; }
+#panel button.big { font-size: 1.1rem; padding: .7rem 1.4rem; }
+#panel button.link { background: none; border: 0; text-decoration: underline; opacity: .7; }
+#panel .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+#panel .choice { border: 1px solid #555; padding: .6rem .8rem; }
+#panel .choice h3 { margin-top: 0; }
+@media (max-width: 700px) { #panel .choices { grid-template-columns: 1fr; } #panel.gate #panel-body { padding: 1rem; } }
+header { position: relative; z-index: 2100; }  /* langue accessible au-dessus du portail */
