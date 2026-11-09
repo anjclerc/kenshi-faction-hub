@@ -1,7 +1,7 @@
 -- Kenshi Faction Hub — migration 014 : bot Discord (rôles + surnoms, votes avec boutons).
 -- Une idée de Akumetsu, créée avec Claude. Ré-exécutable.
 -- La base prévient la fonction « discord-bot » (Supabase Edge Function) ; la fonction relit toujours
--- les vraies données avant d'agir : un appel forgé ne peut au pire que relancer une synchronisation.
+-- les vraies données avant d'agir, et refuse tout appel sans la clé interne (X-Bot-Key).
 
 alter table public.faction_secrets add column if not exists discord_channel text
   check (discord_channel ~ '^https://((ptb|canary)\.)?discord(app)?\.com/channels/[0-9]+/[0-9]+$');
@@ -10,13 +10,30 @@ alter table public.faction_secrets add column if not exists sync_roles boolean n
 alter table public.faction_secrets add column if not exists sync_nick boolean not null default true;
 alter table public.proposals add column if not exists discord_message text;
 
+-- Clé interne base → bot (générée ici, jamais exposée par l'API : schéma privé).
+create schema if not exists private;
+revoke all on schema private from public, anon, authenticated;
+create table if not exists private.bot_key (id int primary key default 1 check (id = 1),
+  key text not null default replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''));
+insert into private.bot_key default values on conflict do nothing;
+
+-- Vérification de la clé par la fonction (service role uniquement).
+create or replace function public.bot_key_ok(p text) returns boolean
+language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from private.bot_key where key = p)
+$$;
+revoke all on function public.bot_key_ok(text) from public, anon, authenticated;
+grant execute on function public.bot_key_ok(text) to service_role;
+
 -- Appel de la fonction du bot (asynchrone, via pg_net).
 create or replace function public.bot_call(p jsonb) returns void
 language plpgsql security definer set search_path = '' as $$
 begin
   perform net.http_post(
     url := 'https://hccytdwfnfiraymeaxkr.supabase.co/functions/v1/discord-bot',
-    body := p, headers := '{"Content-Type": "application/json"}'::jsonb);
+    body := p,
+    headers := jsonb_build_object('Content-Type', 'application/json',
+                                  'X-Bot-Key', (select key from private.bot_key where id = 1)));
 end $$;
 
 create or replace function public.bot_enabled(p_faction uuid) returns boolean

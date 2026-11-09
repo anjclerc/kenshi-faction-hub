@@ -197,7 +197,10 @@ Deno.serve(async req => {
     return json({ type: 4, data: { content: '?', flags: 64 } });
   }
 
-  // appel de la base de données
+  // appel de la base de données : clé interne obligatoire
+  const key = req.headers.get('X-Bot-Key') ?? '';
+  const { data: ok } = await db.rpc('bot_key_ok', { p: key });
+  if (!key || ok !== true) return new Response('forbidden', { status: 403 });
   let body: any;
   try { body = JSON.parse(raw); } catch { return new Response('bad request', { status: 400 }); }
   try {
