@@ -376,8 +376,17 @@
         `<option value="${l}" ${w.lang === l ? 'selected' : ''}>${{ fr: 'Français', en: 'English', ru: 'Русский' }[l]}</option>`).join('')}</select></label>
       <fieldset><legend>${esc(t('hook.events'))}</legend>${HOOK_EVENTS.map(e => `<label class="inline"><input type="checkbox" name="w-ev" value="${e}"
         ${w.events.includes(e) ? 'checked' : ''}> ${esc(t('hook.ev_' + e))}</label>`).join('')}</fieldset>
+      <h3>🤖 ${esc(t('bot.title'))}</h3>
+      <p class="hint">${esc(t('bot.hint'))}</p>
+      <a class="button discord" target="_blank" rel="noopener"
+        href="https://discord.com/oauth2/authorize?client_id=1569234273108762785&permissions=309640317952&scope=bot">🤖 ${esc(t('bot.invite'))}</a>
+      <label>${esc(t('bot.channel'))} <input id="w-channel" placeholder="https://discord.com/channels/…/…" value="${esc(w.discord_channel)}"></label>
+      <p class="hint">${esc(t('bot.channel_hint'))}</p>
+      <label class="inline"><input type="checkbox" id="w-roles" ${w.sync_roles !== false ? 'checked' : ''}> ${esc(t('bot.sync_roles'))}</label>
+      <label class="inline"><input type="checkbox" id="w-nick" ${w.sync_nick !== false ? 'checked' : ''}> ${esc(t('bot.sync_nick'))}</label><br>
       <button data-act="save-hook">${esc(t('acc.save'))}</button>
-      ${state.secrets?.discord_webhook ? `<button data-act="test-hook">${esc(t('hook.test'))}</button>` : ''}`;
+      ${state.secrets?.discord_webhook ? `<button data-act="test-hook">${esc(t('hook.test'))}</button>` : ''}
+      ${state.secrets?.discord_channel ? `<button data-act="bot-resync">🔄 ${esc(t('bot.resync'))}</button>` : ''}`;
   }
 
   function membersHtml() {
@@ -724,9 +733,13 @@
     async 'save-hook'() {
       const ok = await call(sb.from('faction_secrets').upsert({
         faction_id: state.faction.id, discord_webhook: $('#w-url').value.trim() || null, lang: $('#w-lang').value,
-        events: [...document.querySelectorAll('input[name=w-ev]:checked')].map(i => i.value), updated_at: new Date().toISOString()
+        events: [...document.querySelectorAll('input[name=w-ev]:checked')].map(i => i.value), updated_at: new Date().toISOString(),
+        discord_channel: $('#w-channel').value.trim() || null, sync_roles: $('#w-roles').checked, sync_nick: $('#w-nick').checked
       }));
       if (ok) { say(t('acc.saved')); state.secrets = (await sb.from('faction_secrets').select('*').maybeSingle()).data; renderPanel(); }
+    },
+    async 'bot-resync'() {
+      if (await call(sb.rpc('bot_resync'))) say(t('bot.resync_sent'));
     },
     async 'test-hook'() {
       if (await call(sb.rpc('test_webhook'))) say(t('hook.test_sent'));

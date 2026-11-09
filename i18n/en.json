@@ -316,5 +316,14 @@
   "hook.ev_member": "👋 New members",
   "hook.ev_join": "📨 Join requests",
   "hook.test": "Send a test message",
-  "hook.test_sent": "Test message sent: check your Discord channel."
+  "hook.test_sent": "Test message sent: check your Discord channel.",
+  "bot.title": "Discord bot (roles, nicknames, votes)",
+  "bot.hint": "1) Invite the bot to your server. 2) Paste the link of the channel for votes (a forum channel is best). The bot creates the faction roles, gives them to members present on the server, sets their in-game name as nickname and posts each vote with For / Against / Abstain buttons.",
+  "bot.invite": "Invite the bot to our server",
+  "bot.channel": "Votes channel link",
+  "bot.channel_hint": "In Discord: right-click the channel → Copy Link.",
+  "bot.sync_roles": "Sync roles",
+  "bot.sync_nick": "In-game name as nickname",
+  "bot.resync": "Sync now",
+  "bot.resync_sent": "Sync started: roles will appear on Discord in a few seconds."
 }

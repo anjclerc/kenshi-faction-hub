@@ -316,5 +316,14 @@
   "hook.ev_member": "👋 Nouveaux membres",
   "hook.ev_join": "📨 Demandes d'adhésion",
   "hook.test": "Envoyer un message de test",
-  "hook.test_sent": "Message de test envoyé : regarde ton salon Discord."
+  "hook.test_sent": "Message de test envoyé : regarde ton salon Discord.",
+  "bot.title": "Bot Discord (rôles, surnoms, votes)",
+  "bot.hint": "1) Invite le bot sur ton serveur. 2) Colle le lien du salon où poster les votes (un salon forum de préférence). Le bot crée les rôles de la faction, les attribue aux membres présents sur le serveur, met leur pseudo en jeu en surnom et poste chaque vote avec des boutons Pour / Contre / Abstention.",
+  "bot.invite": "Inviter le bot sur notre serveur",
+  "bot.channel": "Lien du salon des votes",
+  "bot.channel_hint": "Dans Discord : clic droit sur le salon → Copier le lien.",
+  "bot.sync_roles": "Synchroniser les rôles",
+  "bot.sync_nick": "Pseudo en jeu en surnom",
+  "bot.resync": "Synchroniser maintenant",
+  "bot.resync_sent": "Synchronisation lancée : les rôles arrivent sur Discord dans quelques secondes."
 }
