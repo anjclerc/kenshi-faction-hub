@@ -277,5 +277,11 @@
   "terr.enemy": "⚠ ennemi",
   "terr.neutral": "neutre",
   "err.quota_territories": "Limite de 20 territoires atteinte.",
-  "role.cartographe": "Cartographe"
+  "role.cartographe": "Cartographe",
+  "terr.kind": "Type de zone",
+  "terr.kind_own": "🛡️ À nous",
+  "terr.kind_ally": "🤝 Alliée",
+  "terr.kind_neutral": "⚪ Neutre",
+  "terr.kind_danger": "☠️ Danger",
+  "terr.danger": "☠️ danger"
 }

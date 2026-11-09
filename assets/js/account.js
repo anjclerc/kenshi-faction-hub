@@ -503,7 +503,8 @@
     own:     { color: '#4a9be8', weight: 2, fillOpacity: .15, className: 'terr-own' },
     ally:    { color: '#e8b04a', weight: 3, fillOpacity: .2, className: 'terr-ally' },
     enemy:   { color: '#c0392b', weight: 3, fillOpacity: .55, dashArray: '10 6', className: 'terr-enemy' },
-    neutral: { color: '#9a8f80', weight: 2, fillOpacity: .06, dashArray: '4 6', className: 'terr-neutral' }
+    neutral: { color: '#9a8f80', weight: 2, fillOpacity: .06, dashArray: '4 6', className: 'terr-neutral' },
+    danger:  { color: '#9b59b6', weight: 3, fillOpacity: .3, dashArray: '2 6', className: 'terr-enemy' }
   };
   function stanceWith(fid) {
     if (fid === state.faction?.id) return 'own';
@@ -535,7 +536,8 @@
   function drawTerritories() {
     KFH.territoryLayer.clearLayers();
     for (const z of state.territories) {
-      const stance = stanceWith(z.faction_id);
+      // Zone « à nous » : apparence selon la relation ; sinon le type choisi au tracé.
+      const stance = (z.kind ?? 'own') === 'own' ? stanceWith(z.faction_id) : z.kind;
       const poly = L.polygon(z.points.map(([x, y]) => KFH.toLatLng(x, y)), TERR_STYLE[stance])
         .bindTooltip(() => `<b>${esc(z.name)}</b><br>${esc(partyName('f:' + z.faction_id))} · ${esc(t('terr.' + stance))}`, { sticky: true })
         .addTo(KFH.territoryLayer);
@@ -550,6 +552,8 @@
         <button data-act="terr-show" data-id="${z.id}" class="small">${esc(t('vote.show_target'))}</button>
         <button data-act="terr-delete" data-id="${z.id}" class="small danger">${esc(t('marker.delete'))}</button></p>`).join('')}
       <label>${esc(t('terr.name'))} <input id="t-name" maxlength="60"></label>
+      <label>${esc(t('terr.kind'))} <select id="t-kind">${['own', 'ally', 'neutral', 'danger'].map(k =>
+        `<option value="${k}">${esc(t('terr.kind_' + k))}</option>`).join('')}</select></label>
       <button data-act="terr-draw">✏️ ${esc(t('terr.draw'))}</button>`;
   }
   // Mode tracé : chaque clic ajoute un coin ; barre « Terminer / Annuler » au-dessus de la carte.
@@ -649,7 +653,7 @@
     'terr-draw'() {
       const name = $('#t-name').value.trim();
       if (!name) { say(t('terr.name_required'), true); $('#t-name').focus(); return; }
-      state.drawing = { name, points: [] };
+      state.drawing = { name, kind: $('#t-kind').value, points: [] };
       $('#panel').hidden = true; renderHeader();
       $('#draw-bar').hidden = false;
       drawStep();
@@ -658,7 +662,7 @@
       const d = state.drawing;
       if (!d || d.points.length < 3) { $('#draw-count').textContent = t('terr.min3'); return; }
       const ok = await call(sb.from('territories').insert({
-        faction_id: state.faction.id, created_by: state.user.id, name: d.name, points: d.points
+        faction_id: state.faction.id, created_by: state.user.id, name: d.name, kind: d.kind, points: d.points
       }));
       drawEnd();
       if (ok) { say(t('terr.saved')); await loadTerritories(); }

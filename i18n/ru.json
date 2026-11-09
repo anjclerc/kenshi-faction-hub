@@ -277,5 +277,11 @@
   "terr.enemy": "⚠ враг",
   "terr.neutral": "нейтральная",
   "err.quota_territories": "Достигнут лимит в 20 территорий.",
-  "role.cartographe": "Картограф"
+  "role.cartographe": "Картограф",
+  "terr.kind": "Тип зоны",
+  "terr.kind_own": "🛡️ Наша",
+  "terr.kind_ally": "🤝 Союзная",
+  "terr.kind_neutral": "⚪ Нейтральная",
+  "terr.kind_danger": "☠️ Опасность",
+  "terr.danger": "☠️ опасность"
 }

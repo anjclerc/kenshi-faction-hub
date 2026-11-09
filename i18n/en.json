@@ -277,5 +277,11 @@
   "terr.enemy": "⚠ enemy",
   "terr.neutral": "neutral",
   "err.quota_territories": "Limit of 20 territories reached.",
-  "role.cartographe": "Cartographer"
+  "role.cartographe": "Cartographer",
+  "terr.kind": "Zone type",
+  "terr.kind_own": "🛡️ Ours",
+  "terr.kind_ally": "🤝 Allied",
+  "terr.kind_neutral": "⚪ Neutral",
+  "terr.kind_danger": "☠️ Danger",
+  "terr.danger": "☠️ danger"
 }
