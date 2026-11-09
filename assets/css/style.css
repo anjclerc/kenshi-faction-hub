@@ -118,3 +118,10 @@ header { position: relative; z-index: 2100; }  /* langue accessible au-dessus du
 .confirm > div { background: var(--panel); border: 1px solid var(--accent); padding: 1rem 1.5rem; max-width: 420px; }
 .confirm button { background: var(--bg); color: var(--text); border: 1px solid var(--accent); padding: .4rem .9rem; margin-right: .5rem; cursor: pointer; }
 .confirm button.danger { border-color: #b02a2a; color: #f0a0a0; }
+
+/* ───── Mercenaires & activités ───── */
+.chip { display: inline-block; border: 1px solid var(--accent); border-radius: 1rem; padding: 0 .5rem; font-size: .75rem; margin: 0 .2rem .2rem 0; }
+#panel .choice.wide { grid-column: 1 / -1; }
+#panel .merc { border: 1px solid #555; padding: .4rem .7rem; margin: .5rem 0; }
+#panel .merc h3 { margin: .1rem 0; }
+#panel .hire-form { border-top: 1px dashed #555; margin-top: .4rem; padding-top: .4rem; }

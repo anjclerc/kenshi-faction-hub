@@ -13,7 +13,8 @@
 ### Objectif
 Un site web pour les joueurs qui jouent à Kenshi en multijoueur, avec le mod [AnarchyKenshi](https://github.com/madscism-collab/AnarchyKenshi-Client).
 - Gérer sa **faction** : nom, couleur, blason, bases, territoire.
-- Gérer les **membres** avec des **rôles** : Créateur, Architecte, Milicien, Diplomate, Marchand, Forgeron, Fermier, Mineur, Médecin, Éclaireur, Recrue.
+- Gérer les **membres** avec des **rôles** : Créateur, Chef, Élu, Conseiller, Architecte, Diplomate, Milicien, Mercenaire, Citoyen, Marchand, Forgeron, Fermier, Mineur, Médecin, Éclaireur, Nouveau venu.
+- **Mercenaires** : pool de joueurs à engager, demandes d'aide, et jeu **en indépendant** sans faction.
 - Relier chaque joueur à son **pseudo en jeu** et son **pseudo Discord**, et afficher le **Discord de la faction**.
 - Gérer la **diplomatie** : alliés (*white list*), neutres, ennemis (*black list*).
 - Tout voir sur une **carte interactive** du monde de Kenshi.
@@ -29,7 +30,7 @@ Un site web pour les joueurs qui jouent à Kenshi en multijoueur, avec le mod [A
 | 5 | Intégration en jeu (selon l'accord de l'auteur d'AnarchyKenshi) | 💭 |
 
 ### Base de données (Supabase)
-Exécuter dans l'ordre dans *SQL Editor* : `supabase/schema.sql`, `supabase/002_votes.sql`, `supabase/003_delete_empty.sql`.
+Exécuter dans l'ordre dans *SQL Editor* : `supabase/schema.sql`, `supabase/002_votes.sql`, `supabase/003_delete_empty.sql`, `supabase/004_mercenaries.sql`.
 
 ### Utiliser en jeu
 Ouvre le site dans le **navigateur de l'overlay Steam** (`Maj` + `Tab`).
@@ -50,7 +51,8 @@ Tout est dans le [Wiki](../../wiki) (copie dans [`docs/wiki/`](docs/wiki)).
 ### Goal
 A website for players running Kenshi in multiplayer with the [AnarchyKenshi](https://github.com/madscism-collab/AnarchyKenshi-Client) mod.
 - Manage your **faction**: name, colour, banner, bases, territory.
-- Manage **members** with **roles**: Founder, Architect, Militia, Diplomat, Trader, Smith, Farmer, Miner, Medic, Scout, Recruit.
+- Manage **members** with **roles**: Founder, Chief, Elected, Councillor, Architect, Diplomat, Militia, Mercenary, Citizen, Trader, Smith, Farmer, Miner, Medic, Scout, Newcomer.
+- **Mercenaries**: pool of players for hire, help requests, and **independent** play without a faction.
 - Link each player to their **in-game name** and **Discord name**, and show the **faction's Discord**.
 - Handle **diplomacy**: allies (*white list*), neutral, enemies (*black list*).
 - See everything on an **interactive map** of the Kenshi world.

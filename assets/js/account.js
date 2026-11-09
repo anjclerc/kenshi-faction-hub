@@ -2,12 +2,14 @@
 // Toute la sécurité est côté base (règles RLS + fonctions) : ce fichier ne fait qu'afficher et appeler.
 (() => {
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const ROLES = ['createur', 'conseiller', 'architecte', 'diplomate', 'milicien', 'citoyen',
-    'marchand', 'forgeron', 'fermier', 'mineur', 'medecin', 'eclaireur', 'nouveau'];
+  const ROLES = ['createur', 'chef', 'elu', 'conseiller', 'architecte', 'diplomate', 'milicien', 'mercenaire',
+    'citoyen', 'marchand', 'forgeron', 'fermier', 'mineur', 'medecin', 'eclaireur', 'nouveau'];
+  const TAGS = ['pvp', 'marchande', 'mercenaires', 'exploration', 'agriculture', 'artisanat', 'roleplay'];
   const SITE = location.origin + location.pathname;
 
   const state = { user: null, profile: null, membership: null, faction: null, parent: null, members: [], history: [], invite: null, inviteInfo: null,
-    tab: 'faction', proposals: [], myVotes: {}, draft: {} };
+    tab: 'faction', proposals: [], myVotes: {}, draft: {},
+    mercs: [], myMerc: null, hires: [], hireDraft: {} };
   const dbMarkers = [];
   const raidMarkers = [];
 
@@ -16,6 +18,10 @@
   const esc = s => String(s ?? '').replace(/[&<>"']/g,
     c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const isCreator = () => state.membership?.role === 'createur';
+  // Gestionnaire : le Créateur ; en faction démocratique, le Chef aussi.
+  const isManager = () => isCreator() || (state.membership?.role === 'chef' && state.faction?.governance === 'democratic');
+  const isSolo = () => !state.faction && !!state.profile?.solo;
+  const canHire = () => !state.faction || ['createur', 'chef', 'diplomate'].includes(state.membership?.role);
 
   function say(msg, isError = false) {
     const el = $('#panel-msg');
@@ -95,10 +101,23 @@
       if (!error) { say(t('acc.joined')); return load(); }
       say(errText(error), true);
     }
+    if (state.user) await loadMercs();
     renderHeader();
     renderPanel();
     loadMarkers();
     drawRaidTargets();
+  }
+
+  async function loadMercs() {
+    const [m, h] = await Promise.all([
+      sb.from('mercenaries').select('*, profiles(game_name, discord_name, memberships(role, factions(name)))'),
+      sb.from('hire_requests').select('*, merc:profiles!hire_requests_mercenary_id_fkey(game_name, discord_name), req:profiles!hire_requests_requester_id_fkey(game_name, discord_name)')
+        .order('created_at', { ascending: false }).limit(50)
+    ]);
+    const all = m.data ?? [];
+    state.myMerc = all.find(x => x.profile_id === state.user.id) ?? null;
+    state.mercs = all.filter(x => x.available && x.profile_id !== state.user.id);
+    state.hires = h.data ?? [];
   }
 
   async function loadProposals() {
@@ -125,19 +144,21 @@
     } else {
       const who = state.profile?.game_name || state.profile?.discord_name || '?';
       const todo = openProposals().filter(p => !state.myVotes[p.id]).length;
-      el.innerHTML = `<button data-act="open">${esc(who)} · ${esc(state.faction?.name ?? t('acc.no_faction'))}</button>
+      const pending = state.hires.filter(h => h.mercenary_id === state.user.id && h.status === 'pending').length;
+      el.innerHTML = `<button data-act="open">${esc(who)} · ${esc(state.faction?.name ?? t(isSolo() ? 'merc.solo' : 'acc.no_faction'))}</button>
         ${state.faction ? `<button data-act="open-votes">${esc(t('vote.tab'))}${canVote() && todo ? ` <b class="badge">${todo}</b>` : ''}</button>` : ''}
+        ${state.faction || isSolo() ? `<button data-act="open-mercs">${esc(t('merc.tab'))}${pending ? ` <b class="badge">${pending}</b>` : ''}</button>` : ''}
         <button data-act="logout">${esc(t('acc.logout'))}</button>`;
     }
-    $('#marker-visibility').hidden = !canPlaceMarker();
+    $('#marker-visibility').hidden = !state.faction || !canPlaceMarker();
   }
 
   // ───────── Panneau ─────────
   // Portail : page de connexion, puis pseudo + créer/rejoindre une faction, avant d'accéder à la carte.
   function renderPanel() {
     const body = $('#panel-body');
-    const needName = state.user && state.faction && !state.profile?.game_name;
-    const gate = !state.user || !state.faction || needName;
+    const needName = state.user && (state.faction || isSolo()) && !state.profile?.game_name;
+    const gate = !state.user || (!state.faction && !isSolo()) || needName;
     const wasGate = $('#panel').classList.contains('gate');
     $('#panel').classList.toggle('gate', gate);
     $('#panel-close').hidden = gate;
@@ -157,22 +178,28 @@
     }
     if (needName) {
       body.innerHTML = `<h1>${esc(t('gate.welcome'))}</h1>
-        <p>${esc(t('gate.joined_as'))} <b>${esc(state.faction.name)}</b> (${esc(t('role.' + state.membership.role))}).</p>
+        ${state.faction ? `<p>${esc(t('gate.joined_as'))} <b>${esc(state.faction.name)}</b> (${esc(t('role.' + state.membership.role))}).</p>` : ''}
         <h2>${esc(t('gate.step_profile'))}</h2>${profileFields()}
         <button data-act="finish-profile" class="big">${esc(t('gate.enter'))}</button>`;
       return;
     }
-    if (!state.faction) {
+    if (!state.faction && !isSolo()) {
       body.innerHTML = `<h1>${esc(t('gate.welcome'))}</h1>
         <h2>1. ${esc(t('gate.step_profile'))}</h2>${profileFields()}
         <h2>2. ${esc(t('gate.step_faction'))}</h2>${noFactionHtml()}
         <button data-act="logout" class="link">${esc(t('acc.logout'))}</button>`;
       return;
     }
-    const tabs = `<nav class="tabs">
-      <button data-act="tab" data-tab="faction" class="${state.tab === 'faction' ? 'active' : ''}">${esc(t('vote.tab_faction'))}</button>
-      <button data-act="tab" data-tab="votes" class="${state.tab === 'votes' ? 'active' : ''}">${esc(t('vote.tab'))}</button></nav>`;
-    body.innerHTML = tabs + (state.tab === 'votes' ? votesHtml() : profileHtml() + factionHtml());
+    const tabList = state.faction ? ['faction', 'votes', 'mercs'] : ['faction', 'mercs'];
+    if (!tabList.includes(state.tab)) state.tab = 'faction';
+    const label = { faction: state.faction ? 'vote.tab_faction' : 'acc.profile', votes: 'vote.tab', mercs: 'merc.tab' };
+    const tabs = `<nav class="tabs">${tabList.map(k =>
+      `<button data-act="tab" data-tab="${k}" class="${state.tab === k ? 'active' : ''}">${esc(t(label[k]))}</button>`).join('')}</nav>`;
+    const content = state.tab === 'votes' ? votesHtml()
+      : state.tab === 'mercs' ? mercsHtml()
+      : state.faction ? profileHtml() + factionHtml()
+      : profileHtml() + `<h2>${esc(t('merc.solo_title'))}</h2><p class="hint">${esc(t('merc.solo_hint'))}</p>` + noFactionHtml(false);
+    body.innerHTML = tabs + content;
     updateVoteForm();
   }
 
@@ -202,7 +229,7 @@
       `<option value="${g}" ${g === selected ? 'selected' : ''}>${esc(t('gov.' + g))}</option>`).join('');
   }
 
-  function noFactionHtml() {
+  function noFactionHtml(withSolo = true) {
     const join = `<div class="choice"><h3>${esc(t('acc.join_title'))}</h3>
       <label>${esc(t('acc.invite_code'))} <input id="j-code" value="${esc(state.invite)}"></label>
       <p class="hint">${esc(t('gate.join_hint'))}</p>
@@ -212,7 +239,10 @@
       <label>${esc(t('acc.governance'))} <select id="c-gov">${governanceOptions('authoritarian')}</select></label>
       <p class="hint">${esc(t('acc.governance_hint'))}</p>
       <button data-act="create">${esc(t('acc.create'))}</button></div>`;
-    return `<div class="choices">${state.invite ? join + create : create + join}</div>`;
+    const solo = withSolo ? `<div class="choice wide"><h3>${esc(t('merc.solo_choice'))}</h3>
+      <p class="hint">${esc(t('merc.solo_choice_hint'))}</p>
+      <button data-act="go-solo">${esc(t('merc.solo_go'))}</button></div>` : '';
+    return `<div class="choices">${state.invite ? join + create : create + join}${solo}</div>`;
   }
 
   function factionHtml() {
@@ -222,10 +252,11 @@
     let html = `<h2><i class="swatch" style="background:${esc(f.color)}"></i> ${esc(f.name)}</h2>
       <p class="hint">${esc(t('gov.' + f.governance))} · ${esc(t('acc.my_role'))} : ${esc(t('role.' + state.membership.role))}
       ${state.parent ? ` · ${esc(t('acc.split_from'))} ${esc(state.parent.name)}` : ''}</p>
+      ${(f.tags ?? []).length ? `<p>${f.tags.map(x => `<span class="chip">${esc(t('tag.' + x))}</span>`).join(' ')}</p>` : ''}
       ${f.description ? `<p class="desc">${esc(f.description)}</p>` : ''}
       ${discord}`;
 
-    if (isCreator()) html += manageHtml(f);
+    if (isManager()) html += manageHtml(f);
     html += membersHtml();
 
     html += `<h3>${esc(t('acc.actions'))}</h3>`;
@@ -247,6 +278,8 @@
       <label>${esc(t('acc.color'))} <input id="f-color" type="color" value="${esc(f.color)}"></label>
       <label>${esc(t('acc.description'))} <textarea id="f-desc" maxlength="2000" rows="3">${esc(f.description)}</textarea></label>
       <label>${esc(t('acc.discord_invite'))} <input id="f-discord" placeholder="https://discord.gg/..." value="${esc(f.discord_invite)}"></label>
+      <fieldset><legend>${esc(t('tag.title'))}</legend>${TAGS.map(x => `<label class="inline"><input type="checkbox" name="tag" value="${x}"
+        ${(f.tags ?? []).includes(x) ? 'checked' : ''}> ${esc(t('tag.' + x))}</label>`).join('')}</fieldset>
       <fieldset><legend>${esc(t('acc.voting_roles'))}</legend>${voting}</fieldset>
       <label class="inline">${esc(t('vote.hours'))} <input id="f-hours" type="number" min="1" max="336" value="${f.vote_hours ?? 48}"></label>
       <label class="inline">${esc(t('vote.inactivity'))} <input id="f-inact" type="number" min="3" max="90" value="${f.inactivity_days ?? 14}"></label>
@@ -261,8 +294,10 @@
   function membersHtml() {
     const rows = state.members.map(m => {
       const self = m.profile_id === state.user.id;
-      const role = isCreator() && !self
-        ? `<select data-member="${m.profile_id}" class="m-role">${ROLES.map(r =>
+      const editable = isManager() && !self && (isCreator() || m.role !== 'createur');
+      const roles = isCreator() ? ROLES : ROLES.filter(r => r !== 'createur');
+      const role = editable
+        ? `<select data-member="${m.profile_id}" class="m-role">${roles.map(r =>
             `<option value="${r}" ${r === m.role ? 'selected' : ''}>${esc(t('role.' + r))}</option>`).join('')}</select>
            <button data-act="kick" data-member="${m.profile_id}" class="danger small">${esc(t('acc.kick'))}</button>`
         : esc(t('role.' + m.role));
@@ -368,6 +403,63 @@
     }
   }
 
+  // ───────── Mercenaires ─────────
+  function mercsHtml() {
+    const me = state.myMerc ?? { available: false };
+    const mine = `<details ${state.myMerc ? '' : 'open'}><summary>${esc(t('merc.my_profile'))}</summary>
+      <label class="inline"><input type="checkbox" id="m-available" ${me.available ? 'checked' : ''}> ${esc(t('merc.available'))}</label>
+      <label>${esc(t('merc.skills'))} <input id="m-skills" maxlength="500" value="${esc(me.skills)}" placeholder="${esc(t('merc.skills_ph'))}"></label>
+      <label>${esc(t('merc.rates'))} <input id="m-rates" maxlength="300" value="${esc(me.rates)}"></label>
+      <label>${esc(t('merc.region'))} <input id="m-region" maxlength="100" value="${esc(me.region)}"></label>
+      <button data-act="save-merc">${esc(t('acc.save'))}</button></details>`;
+
+    const d = state.hireDraft;
+    const pool = state.mercs.map(m => {
+      const p = m.profiles ?? {};
+      const mem = Array.isArray(p.memberships) ? p.memberships[0] : p.memberships;
+      const form = d.merc === m.profile_id ? `<div class="hire-form">
+          <label>${esc(t('merc.mission'))} <textarea id="h-mission" maxlength="1000" rows="2">${esc(d.mission)}</textarea></label>
+          <label>${esc(t('merc.reward'))} <input id="h-reward" maxlength="200" value="${esc(d.reward)}"></label>
+          <label>${esc(t('merc.when'))} <input id="h-date" type="datetime-local" value="${esc(d.date)}"></label>
+          <button data-act="hire-pick">${esc(t('vote.pick_target'))}</button>
+          <span class="hint">${d.x != null ? `${esc(t('vote.target'))} : ${d.x}, ${d.y}` : ''}</span><br>
+          <button data-act="hire-send" data-id="${m.profile_id}">${esc(t('merc.send'))}</button></div>`
+        : (canHire() ? `<button data-act="hire-open" data-id="${m.profile_id}">${esc(t('merc.hire'))}</button>` : '');
+      return `<article class="merc"><h3>${esc(p.game_name || '?')} <span class="hint">· Discord : ${esc(p.discord_name || '—')}</span></h3>
+        <p class="hint">${mem ? `${esc(mem.factions?.name)} (${esc(t('role.' + mem.role))})` : esc(t('merc.solo'))}${m.region ? ' · ' + esc(m.region) : ''}</p>
+        ${m.skills ? `<p>${esc(m.skills)}</p>` : ''}${m.rates ? `<p>💰 ${esc(m.rates)}</p>` : ''}${form}</article>`;
+    }).join('');
+
+    const hireRow = h => {
+      const toMe = h.mercenary_id === state.user.id;
+      const other = toMe ? h.req : h.merc;
+      const actions = toMe && h.status === 'pending'
+        ? `<button data-act="hire-answer" data-id="${h.id}" data-status="accepted">${esc(t('merc.accept'))}</button>
+           <button data-act="hire-answer" data-id="${h.id}" data-status="declined" class="danger">${esc(t('merc.decline'))}</button>`
+        : (!toMe && ['pending', 'accepted'].includes(h.status)
+          ? `<button data-act="hire-answer" data-id="${h.id}" data-status="cancelled" class="link">${esc(t('merc.cancel'))}</button>` : '');
+      return `<article class="proposal ${h.status === 'accepted' ? 'passed' : h.status === 'pending' ? 'open' : 'rejected'}">
+        <p class="hint">${esc(t(toMe ? 'merc.from' : 'merc.to'))} <b>${esc(other?.game_name || '?')}</b> (Discord : ${esc(other?.discord_name || '—')}) · ${esc(t('merc.status_' + h.status))}</p>
+        <p class="desc">${esc(h.mission)}</p>
+        <p>${h.reward ? `💰 ${esc(h.reward)} ` : ''}${h.event_at ? `· 🕒 ${esc(fmtDate(h.event_at))} ` : ''}
+          ${h.target_x != null ? `<button data-act="show-target" data-x="${h.target_x}" data-y="${h.target_y}" class="small">${esc(t('vote.show_target'))}</button>` : ''}</p>
+        ${actions}</article>`;
+    };
+    const received = state.hires.filter(h => h.mercenary_id === state.user.id);
+    const sent = state.hires.filter(h => h.mercenary_id !== state.user.id);
+
+    return `<h2>${esc(t('merc.tab'))}</h2>${mine}
+      ${received.length ? `<h3>${esc(t('merc.received'))}</h3>${received.map(hireRow).join('')}` : ''}
+      ${sent.length ? `<h3>${esc(t('merc.sent'))}</h3>${sent.map(hireRow).join('')}` : ''}
+      <h3>${esc(t('merc.pool'))} (${state.mercs.length})</h3>
+      ${canHire() ? '' : `<p class="hint">${esc(t('merc.cannot_hire'))}</p>`}
+      ${pool || `<p class="hint">${esc(t('merc.none'))}</p>`}`;
+  }
+  function saveHireDraft() {
+    if (!$('#h-mission')) return;
+    Object.assign(state.hireDraft, { mission: $('#h-mission').value, reward: $('#h-reward').value, date: $('#h-date').value });
+  }
+
   // ───────── Actions ─────────
   const actions = {
     async login() {
@@ -380,7 +472,46 @@
     },
     open() { state.tab = 'faction'; renderPanel(); $('#panel').hidden = false; },
     'open-votes'() { state.tab = 'votes'; renderPanel(); $('#panel').hidden = false; },
-    tab(btn) { saveDraft(); state.tab = btn.dataset.tab; renderPanel(); },
+    'open-mercs'() { state.tab = 'mercs'; renderPanel(); $('#panel').hidden = false; },
+    async 'go-solo'() {
+      if (!await saveProfileFromForm()) return;
+      const ok = await call(sb.from('profiles').update({ solo: true }).eq('id', state.user.id));
+      if (ok) await load();
+    },
+    async 'save-merc'() {
+      const ok = await call(sb.from('mercenaries').upsert({
+        profile_id: state.user.id, available: $('#m-available').checked,
+        skills: $('#m-skills').value.trim() || null, rates: $('#m-rates').value.trim() || null,
+        region: $('#m-region').value.trim() || null, updated_at: new Date().toISOString()
+      }));
+      if (ok) { say(t('acc.saved')); await loadMercs(); renderPanel(); }
+    },
+    'hire-open'(btn) { state.hireDraft = { merc: btn.dataset.id }; renderPanel(); },
+    'hire-pick'() {
+      saveHireDraft();
+      $('#panel').hidden = true;
+      $('#marker-hint').textContent = t('vote.pick_hint');
+      KFH.onPick = p => {
+        Object.assign(state.hireDraft, { x: p.x, y: p.y });
+        $('#marker-hint').textContent = t('map.hint');
+        renderPanel();
+        $('#panel').hidden = false;
+      };
+    },
+    async 'hire-send'(btn) {
+      saveHireDraft();
+      const d = state.hireDraft;
+      const ok = await call(sb.rpc('request_hire', {
+        p_mercenary: btn.dataset.id, p_mission: (d.mission ?? '').trim(), p_reward: (d.reward ?? '').trim(),
+        p_event_at: d.date ? new Date(d.date).toISOString() : null, p_x: d.x ?? null, p_y: d.y ?? null
+      }));
+      if (ok) { state.hireDraft = {}; say(t('merc.sent_ok')); await loadMercs(); renderPanel(); }
+    },
+    async 'hire-answer'(btn) {
+      const ok = await call(sb.rpc('answer_hire', { p_request: +btn.dataset.id, p_status: btn.dataset.status }));
+      if (ok) { await loadMercs(); renderHeader(); renderPanel(); }
+    },
+    tab(btn) { saveDraft(); saveHireDraft(); state.tab = btn.dataset.tab; renderPanel(); },
     async vote(btn) {
       const ok = await call(sb.rpc('cast_vote', { p_proposal: +btn.dataset.id, p_choice: btn.dataset.choice }));
       if (ok) { await loadProposals(); renderHeader(); renderPanel(); }
@@ -451,6 +582,7 @@
         description: $('#f-desc').value.trim() || null,
         discord_invite: $('#f-discord').value.trim() || null,
         voting_roles: roles,
+        tags: [...document.querySelectorAll('input[name=tag]:checked')].map(i => i.value),
         vote_hours: +$('#f-hours').value,
         inactivity_days: +$('#f-inact').value
       }).eq('id', state.faction.id));
@@ -502,11 +634,13 @@
 
   // ───────── Marqueurs en ligne ─────────
   function canPlaceMarker() {
-    return !!state.faction && state.membership.role !== 'nouveau';
+    return (!!state.faction && state.membership.role !== 'nouveau') || isSolo();
   }
   function canDelete(m) {
-    return state.user && m.faction_id === state.faction?.id &&
-      (m.created_by === state.user.id || ['createur', 'architecte'].includes(state.membership.role));
+    if (!state.user) return false;
+    if (!m.faction_id) return m.created_by === state.user.id;   // point de chute personnel
+    return m.faction_id === state.faction?.id &&
+      (m.created_by === state.user.id || ['createur', 'chef', 'architecte'].includes(state.membership.role));
   }
 
   async function loadMarkers() {
@@ -534,7 +668,8 @@
   KFH.onMarkerPlaced = async m => {
     if (!canPlaceMarker()) return false;
     const ok = await call(sb.from('markers').insert({
-      ...m, faction_id: state.faction.id, created_by: state.user.id, visibility: $('#marker-visibility').value
+      ...m, faction_id: state.faction?.id ?? null, created_by: state.user.id,
+      visibility: state.faction ? $('#marker-visibility').value : 'faction'
     }));
     if (ok) loadMarkers();
     return !!ok;
