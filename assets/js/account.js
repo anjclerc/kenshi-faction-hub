@@ -6,8 +6,10 @@
     'marchand', 'forgeron', 'fermier', 'mineur', 'medecin', 'eclaireur', 'nouveau'];
   const SITE = location.origin + location.pathname;
 
-  const state = { user: null, profile: null, membership: null, faction: null, parent: null, members: [], history: [], invite: null, inviteInfo: null };
+  const state = { user: null, profile: null, membership: null, faction: null, parent: null, members: [], history: [], invite: null, inviteInfo: null,
+    tab: 'faction', proposals: [], myVotes: {}, draft: {} };
   const dbMarkers = [];
+  const raidMarkers = [];
 
   const $ = sel => document.querySelector(sel);
   const t = k => I18N.t(k);
@@ -42,6 +44,8 @@
 
     if (state.user) {
       const uid = state.user.id;
+      await sb.rpc('touch');
+      await sb.rpc('close_due_proposals');   // clôture des votes échus (peut dissoudre la faction)
       const [p, m, h] = await Promise.all([
         sb.from('profiles').select('*').eq('id', uid).maybeSingle(),
         sb.from('memberships').select('faction_id, role').eq('profile_id', uid).maybeSingle(),
@@ -55,11 +59,12 @@
         const fid = state.membership.faction_id;
         const [f, mem] = await Promise.all([
           sb.from('factions').select('*').eq('id', fid).single(),
-          sb.from('memberships').select('profile_id, role, joined_at, profiles(game_name, discord_name)')
+          sb.from('memberships').select('profile_id, role, joined_at, profiles(game_name, discord_name, last_seen_at)')
             .eq('faction_id', fid).order('joined_at')
         ]);
         state.faction = f.data;
         state.members = mem.data ?? [];
+        await loadProposals();
         if (state.faction?.parent_id) {
           state.parent = (await sb.from('factions').select('name').eq('id', state.faction.parent_id).maybeSingle()).data;
         }
@@ -77,7 +82,24 @@
     renderHeader();
     renderPanel();
     loadMarkers();
+    drawRaidTargets();
   }
+
+  async function loadProposals() {
+    const [pr, v] = await Promise.all([
+      sb.from('proposals').select('*').order('created_at', { ascending: false }).limit(60),
+      sb.from('votes').select('proposal_id, choice')
+    ]);
+    state.proposals = pr.data ?? [];
+    state.myVotes = Object.fromEntries((v.data ?? []).map(x => [x.proposal_id, x.choice]));
+  }
+  const canVote = () => !!state.faction && state.faction.voting_roles.includes(state.membership.role);
+  const openProposals = () => state.proposals.filter(p => p.status === 'open');
+  const memberName = id => {
+    const m = state.members.find(x => x.profile_id === id);
+    return m ? (m.profiles?.game_name || m.profiles?.discord_name || '?') : '?';
+  };
+  const leader = () => state.members.find(m => m.role === 'createur');
 
   // ───────── En-tête ─────────
   function renderHeader() {
@@ -86,7 +108,9 @@
       el.innerHTML = `<button data-act="login" class="discord">${esc(t('acc.login'))}</button>`;
     } else {
       const who = state.profile?.game_name || state.profile?.discord_name || '?';
+      const todo = openProposals().filter(p => !state.myVotes[p.id]).length;
       el.innerHTML = `<button data-act="open">${esc(who)} · ${esc(state.faction?.name ?? t('acc.no_faction'))}</button>
+        ${state.faction ? `<button data-act="open-votes">${esc(t('vote.tab'))}${canVote() && todo ? ` <b class="badge">${todo}</b>` : ''}</button>` : ''}
         <button data-act="logout">${esc(t('acc.logout'))}</button>`;
     }
     $('#marker-visibility').hidden = !canPlaceMarker();
@@ -129,7 +153,11 @@
         <button data-act="logout" class="link">${esc(t('acc.logout'))}</button>`;
       return;
     }
-    body.innerHTML = profileHtml() + factionHtml();
+    const tabs = `<nav class="tabs">
+      <button data-act="tab" data-tab="faction" class="${state.tab === 'faction' ? 'active' : ''}">${esc(t('vote.tab_faction'))}</button>
+      <button data-act="tab" data-tab="votes" class="${state.tab === 'votes' ? 'active' : ''}">${esc(t('vote.tab'))}</button></nav>`;
+    body.innerHTML = tabs + (state.tab === 'votes' ? votesHtml() : profileHtml() + factionHtml());
+    updateVoteForm();
   }
 
   function profileFields() {
@@ -204,6 +232,8 @@
       <label>${esc(t('acc.description'))} <textarea id="f-desc" maxlength="2000" rows="3">${esc(f.description)}</textarea></label>
       <label>${esc(t('acc.discord_invite'))} <input id="f-discord" placeholder="https://discord.gg/..." value="${esc(f.discord_invite)}"></label>
       <fieldset><legend>${esc(t('acc.voting_roles'))}</legend>${voting}</fieldset>
+      <label class="inline">${esc(t('vote.hours'))} <input id="f-hours" type="number" min="1" max="336" value="${f.vote_hours ?? 48}"></label>
+      <label class="inline">${esc(t('vote.inactivity'))} <input id="f-inact" type="number" min="3" max="90" value="${f.inactivity_days ?? 14}"></label>
       <button data-act="save-faction">${esc(t('acc.save'))}</button>
       <h3>${esc(t('acc.invite_title'))}</h3>
       <label class="inline">${esc(t('acc.invite_days'))} <input id="i-days" type="number" min="1" max="90" value="7"></label>
@@ -226,6 +256,102 @@
       <table class="members"><tr><th>${esc(t('acc.game_name'))}</th><th>Discord</th><th>${esc(t('acc.role'))}</th></tr>${rows}</table>`;
   }
 
+  // ───────── Votes ─────────
+  const KINDS = ['general', 'resources', 'raid', 'governance', 'dissolution', 'depose'];
+  const fmtDate = d => new Date(d).toLocaleString(I18N.lang, { dateStyle: 'medium', timeStyle: 'short' });
+  function timeLeft(d) {
+    const h = Math.max(0, Math.floor((new Date(d) - Date.now()) / 3.6e6));
+    return h >= 24 ? `${Math.floor(h / 24)} ${t('vote.days')} ${h % 24} h` : `${Math.max(h, 1)} h`;
+  }
+  function leaderInactive() {
+    const l = leader();
+    if (!l) return true;
+    const seen = l.profiles?.last_seen_at ? new Date(l.profiles.last_seen_at) : new Date();
+    return Date.now() - seen > (state.faction.inactivity_days ?? 14) * 864e5;
+  }
+
+  function proposalHtml(p) {
+    const mine = state.myVotes[p.id];
+    const binding = state.faction.governance === 'democratic' || ['governance', 'dissolution', 'depose'].includes(p.kind);
+    const extra = [];
+    if (p.kind === 'raid' && p.event_at) extra.push(`⚔ ${esc(fmtDate(p.event_at))}`);
+    if (p.target_x != null) extra.push(`<button data-act="show-target" data-x="${p.target_x}" data-y="${p.target_y}" class="small">${esc(t('vote.show_target'))}</button>`);
+    if (p.kind === 'depose') extra.push(`${esc(t('vote.candidate'))} : <b>${esc(memberName(p.target_profile))}</b>`);
+    const counts = `👍 ${p.yes_count} · 👎 ${p.no_count} · ⚪ ${p.abstain_count}`;
+    let footer;
+    if (p.status === 'open') {
+      const btn = (c, label) => `<button data-act="vote" data-id="${p.id}" data-choice="${c}" class="${mine === c ? 'active' : ''}">${label}</button>`;
+      footer = `<p class="hint">${esc(t('vote.closes_in'))} ${esc(timeLeft(p.closes_at))} · ${counts}</p>
+        ${canVote() ? btn('yes', esc(t('vote.yes'))) + btn('no', esc(t('vote.no'))) + btn('abstain', esc(t('vote.abstain'))) : `<p class="hint">${esc(t('vote.no_right'))}</p>`}
+        ${p.created_by === state.user.id || state.membership.role === 'createur'
+          ? `<button data-act="cancel-vote" data-id="${p.id}" class="link">${esc(t('vote.cancel'))}</button>` : ''}`;
+    } else {
+      footer = `<p class="status ${p.status}">${esc(t('vote.status_' + p.status))} · ${counts}</p>`;
+    }
+    return `<article class="proposal ${p.status}">
+      <p class="hint">${esc(t('vote.kind_' + p.kind))}${binding ? '' : ` · ${esc(t('vote.advisory'))}`} · ${esc(t('vote.by'))} ${esc(memberName(p.created_by))}</p>
+      <h3>${esc(p.title)}</h3>
+      ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ''}
+      ${extra.length ? `<p>${extra.join(' · ')}</p>` : ''}
+      ${footer}</article>`;
+  }
+
+  function votesHtml() {
+    const d = state.draft;
+    const kinds = KINDS.filter(k => k !== 'depose' || leaderInactive());
+    const candidates = state.members.filter(m => m.role !== 'createur');
+    const form = canVote() ? `<details ${d.open ? 'open' : ''} id="v-details"><summary>${esc(t('vote.new'))}</summary>
+      <label>${esc(t('vote.kind'))} <select id="v-kind">${kinds.map(k =>
+        `<option value="${k}" ${k === (d.kind ?? 'general') ? 'selected' : ''}>${esc(t('vote.kind_' + k))}</option>`).join('')}</select></label>
+      <p class="hint" id="v-kind-hint"></p>
+      <label>${esc(t('vote.title'))} <input id="v-title" maxlength="120" value="${esc(d.title)}"></label>
+      <label>${esc(t('acc.description'))} <textarea id="v-desc" maxlength="4000" rows="3">${esc(d.desc)}</textarea></label>
+      <div id="v-raid">
+        <label>${esc(t('vote.event_at'))} <input id="v-date" type="datetime-local" value="${esc(d.date)}"></label>
+        <button data-act="pick-target">${esc(t('vote.pick_target'))}</button>
+        <span class="hint">${d.x != null ? `${esc(t('vote.target'))} : ${d.x}, ${d.y}` : ''}</span>
+      </div>
+      <label id="v-depose">${esc(t('vote.candidate'))} <select id="v-target">${candidates.map(m =>
+        `<option value="${m.profile_id}">${esc(memberName(m.profile_id))}</option>`).join('')}</select></label>
+      <button data-act="propose">${esc(t('vote.submit'))}</button></details>`
+      : `<p class="hint">${esc(t('vote.no_right'))}</p>`;
+    const open = openProposals();
+    const closed = state.proposals.filter(p => p.status !== 'open').slice(0, 15);
+    return `<h2>${esc(t('vote.tab'))}</h2>
+      <p class="hint">${esc(t(state.faction.governance === 'democratic' ? 'vote.rule_demo' : 'vote.rule_auth'))}</p>
+      ${form}
+      <h3>${esc(t('vote.open'))} (${open.length})</h3>
+      ${open.map(proposalHtml).join('') || `<p class="hint">${esc(t('vote.none'))}</p>`}
+      ${closed.length ? `<h3>${esc(t('vote.closed'))}</h3>${closed.map(proposalHtml).join('')}` : ''}`;
+  }
+
+  // Affiche les champs utiles selon le type de proposition.
+  function updateVoteForm() {
+    const kind = $('#v-kind')?.value;
+    if (!kind) return;
+    $('#v-raid').hidden = kind !== 'raid';
+    $('#v-depose').hidden = kind !== 'depose';
+    $('#v-kind-hint').textContent = t('vote.hint_' + kind);
+  }
+  function saveDraft() {
+    if (!$('#v-kind')) return;
+    Object.assign(state.draft, {
+      open: $('#v-details')?.open, kind: $('#v-kind').value, title: $('#v-title').value,
+      desc: $('#v-desc').value, date: $('#v-date').value
+    });
+  }
+
+  // Cibles des raids en cours sur la carte.
+  function drawRaidTargets() {
+    if (!KFH.map) return;
+    raidMarkers.splice(0).forEach(l => l.remove());
+    for (const p of openProposals().filter(p => p.target_x != null)) {
+      raidMarkers.push(KFH.dot(p.target_x, p.target_y, '#ff2d2d', 11)
+        .bindTooltip(() => `⚔ ${esc(p.title)}${p.event_at ? ' — ' + esc(fmtDate(p.event_at)) : ''}`)
+        .addTo(KFH.markerLayer));
+    }
+  }
+
   // ───────── Actions ─────────
   const actions = {
     async login() {
@@ -236,7 +362,50 @@
       say('');
       load();
     },
-    open() { $('#panel').hidden = false; },
+    open() { state.tab = 'faction'; renderPanel(); $('#panel').hidden = false; },
+    'open-votes'() { state.tab = 'votes'; renderPanel(); $('#panel').hidden = false; },
+    tab(btn) { saveDraft(); state.tab = btn.dataset.tab; renderPanel(); },
+    async vote(btn) {
+      const ok = await call(sb.rpc('cast_vote', { p_proposal: +btn.dataset.id, p_choice: btn.dataset.choice }));
+      if (ok) { await loadProposals(); renderHeader(); renderPanel(); }
+    },
+    async 'cancel-vote'(btn) {
+      if (!confirm(t('vote.cancel_confirm'))) return;
+      const ok = await call(sb.rpc('cancel_proposal', { p_proposal: +btn.dataset.id }));
+      if (ok) { await loadProposals(); renderHeader(); renderPanel(); drawRaidTargets(); }
+    },
+    async propose() {
+      saveDraft();
+      const d = state.draft;
+      const kind = d.kind;
+      if (['dissolution', 'depose'].includes(kind) && !confirm(t('vote.confirm_' + kind))) return;
+      const ok = await call(sb.rpc('create_proposal', {
+        p_kind: kind, p_title: d.title.trim(), p_description: d.desc.trim(),
+        p_event_at: kind === 'raid' && d.date ? new Date(d.date).toISOString() : null,
+        p_x: kind === 'raid' ? d.x ?? null : null, p_y: kind === 'raid' ? d.y ?? null : null,
+        p_target: kind === 'depose' ? $('#v-target').value : null
+      }));
+      if (ok) {
+        state.draft = {};
+        say(t('vote.created'));
+        await loadProposals(); renderHeader(); renderPanel(); drawRaidTargets();
+      }
+    },
+    'pick-target'() {
+      saveDraft();
+      $('#panel').hidden = true;
+      $('#marker-hint').textContent = t('vote.pick_hint');
+      KFH.onPick = p => {
+        Object.assign(state.draft, { x: p.x, y: p.y, open: true });
+        $('#marker-hint').textContent = t('map.hint');
+        renderPanel();
+        $('#panel').hidden = false;
+      };
+    },
+    'show-target'(btn) {
+      $('#panel').hidden = true;
+      KFH.map.flyTo(KFH.toLatLng(+btn.dataset.x, +btn.dataset.y), 4);
+    },
     async 'save-profile'() {
       const ok = await call(sb.from('profiles').update({
         game_name: $('#p-game').value.trim(), discord_name: $('#p-discord').value.trim()
@@ -265,7 +434,9 @@
         color: $('#f-color').value,
         description: $('#f-desc').value.trim() || null,
         discord_invite: $('#f-discord').value.trim() || null,
-        voting_roles: roles
+        voting_roles: roles,
+        vote_hours: +$('#f-hours').value,
+        inactivity_days: +$('#f-inact').value
       }).eq('id', state.faction.id));
       if (ok) { say(t('acc.saved')); load(); }
     },
@@ -303,6 +474,7 @@
     if (btn && actions[btn.dataset.act]) { e.preventDefault(); actions[btn.dataset.act](btn); }
   });
   document.addEventListener('change', async e => {
+    if (e.target.id === 'v-kind') { updateVoteForm(); return; }
     if (!e.target.matches('.m-role')) return;
     const role = e.target.value;
     if (role === 'createur' && !confirm(t('acc.transfer_confirm'))) { renderPanel(); return; }
@@ -373,7 +545,7 @@
     if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') setTimeout(load, 0);
   });
   document.addEventListener('kfh:lang', () => { renderHeader(); renderPanel(); });
-  document.addEventListener('kfh:map-ready', loadMarkers);
+  document.addEventListener('kfh:map-ready', () => { loadMarkers(); drawRaidTargets(); });
 
   (async () => {
     if (state.invite) {

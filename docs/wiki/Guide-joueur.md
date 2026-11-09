@@ -25,3 +25,12 @@ Les membres (sauf Nouveaux venus) posent des marqueurs enregistrés en ligne, vi
 ## Quitter / faire scission
 - **Quitter la faction** : à tout moment (le Créateur doit d'abord transmettre son rôle, sauf s'il est seul).
 - **Faire scission** : crée une nouvelle faction « issue de la scission de… » et invite ceux qui partent avec toi.
+
+## Votes
+Onglet **Votes** (bouton en haut ; le chiffre rouge = votes en attente de ta voix).
+- **Qui vote** : les rôles cochés par le Créateur dans *Gérer la faction* (ex. Citoyens et Conseil, pas les Nouveaux venus).
+- **Types** : proposition, ressources / construction, **raid** (date + heure + cible choisie sur la carte, affichée en ⚔ rouge), changement de type de faction, dissolution, destitution du chef (seulement s'il est inactif depuis X jours).
+- **Vote secret** : on ne voit que les totaux. On peut changer son vote jusqu'à la fin.
+- **Résultat** : adoptée si plus de « Pour » que de « Contre » à la fin (durée réglable, 48 h par défaut).
+- **Faction autoritaire** : votes consultatifs, sauf changement de type, dissolution et destitution qui s'appliquent automatiquement.
+- Les heures s'affichent dans le fuseau de chaque joueur.

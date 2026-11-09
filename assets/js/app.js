@@ -96,6 +96,7 @@ const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g,
     const p = toPixel(e.latlng);
     const out = document.getElementById('marker-json');
     if (p.x < 0 || p.y < 0 || p.x > config.size || p.y > config.size) return;  // hors de la carte
+    if (KFH.onPick) { const pick = KFH.onPick; KFH.onPick = null; pick(p); return; }  // choix d'un point (cible de raid)
     if (!placing) {
       out.value = `"x": ${p.x}, "y": ${p.y}`;
       return;
