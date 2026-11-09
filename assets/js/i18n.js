@@ -15,6 +15,7 @@ const I18N = {
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
       el.placeholder = this.t(el.dataset.i18nPlaceholder);
     });
+    document.dispatchEvent(new Event('kfh:lang'));
   },
 
   t(key) {

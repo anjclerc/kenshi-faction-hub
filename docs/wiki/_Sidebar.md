@@ -5,6 +5,7 @@
 - [[Carte interactive|Carte-interactive]]
 - [[Intégration en jeu|Integration-en-jeu]]
 - [[Traductions|Traductions]]
+- [[Guide du joueur|Guide-joueur]]
 - [[Contribuer|Contribuer]]
 
 ---

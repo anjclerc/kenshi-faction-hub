@@ -24,6 +24,10 @@ const MARKER_STYLES = {
   other:        '#999999'
 };
 
+const KFH = window.KFH = {};
+const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g,
+  c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
 (async () => {
   const [config, places, markers] = await Promise.all(
     ['data/map.json', 'data/towns.json', 'data/markers.json'].map(u => fetch(u).then(r => r.json()))
@@ -51,14 +55,14 @@ const MARKER_STYLES = {
   for (const [cat, s] of Object.entries(PLACE_STYLES)) {
     layers[`place.${cat}`] = { color: s.color, group: L.layerGroup(
       places.filter(p => p.category === cat)
-            .map(p => dot(p.x, p.y, s.color, s.radius).bindTooltip(p.name))
+            .map(p => dot(p.x, p.y, s.color, s.radius).bindTooltip(escapeHtml(p.name)))
     ), on: cat !== 'nest' };
   }
 
   // Marqueurs des joueurs.
   const markerLayer = L.layerGroup();
   const addMarker = m => dot(m.x, m.y, MARKER_STYLES[m.type] ?? MARKER_STYLES.other, 8)
-    .bindTooltip(() => `${m.name} (${I18N.t('marker.' + m.type)})`).addTo(markerLayer);
+    .bindTooltip(() => `${escapeHtml(m.name)} (${I18N.t('marker.' + m.type)})`).addTo(markerLayer);
   markers.forEach(addMarker);
   layers.markers = { color: '#ffffff', group: markerLayer, on: true };
 
@@ -88,9 +92,10 @@ const MARKER_STYLES = {
     document.getElementById('marker-hint').textContent = I18N.t('marker.click');
   });
 
-  map.on('click', e => {
+  map.on('click', async e => {
     const p = toPixel(e.latlng);
     const out = document.getElementById('marker-json');
+    if (p.x < 0 || p.y < 0 || p.x > config.size || p.y > config.size) return;  // hors de la carte
     if (!placing) {
       out.value = `"x": ${p.x}, "y": ${p.y}`;
       return;
@@ -100,10 +105,21 @@ const MARKER_STYLES = {
       name: document.getElementById('marker-name').value || I18N.t('marker.' + typeSelect.value),
       type: typeSelect.value, x: p.x, y: p.y
     };
+    const hint = document.getElementById('marker-hint');
+    // Connecté avec une faction : le module compte enregistre le marqueur en ligne.
+    if (KFH.onMarkerPlaced && await KFH.onMarkerPlaced(m)) {
+      out.value = '';
+      hint.textContent = I18N.t('marker.saved');
+      return;
+    }
     addMarker(m);
     out.value = JSON.stringify(m);
-    document.getElementById('marker-hint').textContent = I18N.t('marker.copy');
+    hint.textContent = I18N.t('marker.copy');
   });
+
+  // Accès pour le module compte (account.js).
+  Object.assign(KFH, { map, dot, toLatLng, markerLayer, MARKER_STYLES });
+  document.dispatchEvent(new Event('kfh:map-ready'));
 
   // Langue.
   const select = document.getElementById('lang');

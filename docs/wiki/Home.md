@@ -10,6 +10,7 @@ Site de gestion de factions pour **Kenshi multijoueur** (mod AnarchyKenshi).
 - [[Carte interactive|Carte-interactive]] — comment fonctionne la map et comment ajouter des lieux
 - [[Intégration en jeu|Integration-en-jeu]] — ce qui est possible avec Kenshi et le Workshop
 - [[Traductions|Traductions]] — ajouter ou corriger une langue
+- [[Guide du joueur|Guide-joueur]] — se connecter, créer ou rejoindre une faction
 - [[Contribuer|Contribuer]] — participer au projet
 
 ## Feuille de route

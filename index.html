@@ -11,6 +11,7 @@
   <header>
     <h1>Kenshi Faction Hub</h1>
     <nav>
+      <span id="auth"></span>
       <label for="lang" data-i18n="lang.label">Langue</label>
       <select id="lang">
         <option value="fr">Français</option>
@@ -27,12 +28,22 @@
 
       <h2 data-i18n="marker.title">Ajouter un marqueur</h2>
       <select id="marker-type"></select>
-      <input id="marker-name" type="text" data-i18n-placeholder="marker.name">
+      <input id="marker-name" type="text" maxlength="60" data-i18n-placeholder="marker.name">
+      <select id="marker-visibility" hidden>
+        <option value="faction" data-i18n="marker.vis_faction">Visible par ma faction</option>
+        <option value="public" data-i18n="marker.vis_public">Visible par tous</option>
+      </select>
       <button id="marker-place" data-i18n="marker.place">Placer sur la carte</button>
       <p class="hint" id="marker-hint" data-i18n="map.hint">Clique sur la carte pour obtenir les coordonnées.</p>
       <textarea id="marker-json" readonly rows="3"></textarea>
     </aside>
     <div id="map"></div>
+
+    <section id="panel" hidden>
+      <button id="panel-close" aria-label="×">×</button>
+      <p id="panel-msg" role="status"></p>
+      <div id="panel-body"></div>
+    </section>
   </main>
 
   <footer>
@@ -41,7 +52,10 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js"></script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/app.js"></script>
+  <script src="assets/js/account.js"></script>
 </body>
 </html>
