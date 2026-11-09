@@ -554,6 +554,8 @@
       <label>${esc(t('terr.name'))} <input id="t-name" maxlength="60"></label>
       <label>${esc(t('terr.kind'))} <select id="t-kind">${['own', 'ally', 'neutral', 'danger'].map(k =>
         `<option value="${k}">${esc(t('terr.kind_' + k))}</option>`).join('')}</select></label>
+      <label>${esc(t('terr.visibility'))} <select id="t-vis">${['public', 'allies', 'faction'].map(v =>
+        `<option value="${v}">${esc(t('marker.vis_' + v))}</option>`).join('')}</select></label>
       <button data-act="terr-draw">✏️ ${esc(t('terr.draw'))}</button>`;
   }
   // Mode tracé : chaque clic ajoute un coin ; barre « Terminer / Annuler » au-dessus de la carte.
@@ -653,7 +655,7 @@
     'terr-draw'() {
       const name = $('#t-name').value.trim();
       if (!name) { say(t('terr.name_required'), true); $('#t-name').focus(); return; }
-      state.drawing = { name, kind: $('#t-kind').value, points: [] };
+      state.drawing = { name, kind: $('#t-kind').value, visibility: $('#t-vis').value, points: [] };
       $('#panel').hidden = true; renderHeader();
       $('#draw-bar').hidden = false;
       drawStep();
@@ -662,7 +664,7 @@
       const d = state.drawing;
       if (!d || d.points.length < 3) { $('#draw-count').textContent = t('terr.min3'); return; }
       const ok = await call(sb.from('territories').insert({
-        faction_id: state.faction.id, created_by: state.user.id, name: d.name, kind: d.kind, points: d.points
+        faction_id: state.faction.id, created_by: state.user.id, name: d.name, kind: d.kind, visibility: d.visibility, points: d.points
       }));
       drawEnd();
       if (ok) { say(t('terr.saved')); await loadTerritories(); }

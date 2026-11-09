@@ -283,5 +283,6 @@
   "terr.kind_ally": "🤝 Alliée",
   "terr.kind_neutral": "⚪ Neutre",
   "terr.kind_danger": "☠️ Danger",
-  "terr.danger": "☠️ danger"
+  "terr.danger": "☠️ danger",
+  "terr.visibility": "Qui voit cette zone"
 }

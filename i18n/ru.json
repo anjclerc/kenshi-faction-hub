@@ -283,5 +283,6 @@
   "terr.kind_ally": "🤝 Союзная",
   "terr.kind_neutral": "⚪ Нейтральная",
   "terr.kind_danger": "☠️ Опасность",
-  "terr.danger": "☠️ опасность"
+  "terr.danger": "☠️ опасность",
+  "terr.visibility": "Кто видит эту зону"
 }
