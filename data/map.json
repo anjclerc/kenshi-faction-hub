@@ -1,5 +1,5 @@
 {
-  "image": "assets/map/kenshi-map.jpg",
-  "width": 4096,
-  "height": 4096
+  "tiles": "assets/map/tiles/{z}/{x}/{y}.jpg",
+  "size": 8192,
+  "maxNativeZoom": 5
 }

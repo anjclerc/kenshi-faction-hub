@@ -1,11 +1,11 @@
 # Carte interactive
 
-La carte utilise **Leaflet** en mode `CRS.Simple` : les coordonnées sont les **pixels de l'image** (`x` = horizontal, `y` = vertical, origine en bas à gauche).
+La carte utilise **Leaflet** en mode `CRS.Simple` : les coordonnées sont les **pixels de l'image 8192 × 8192** (`x` vers la droite, `y` vers le bas, origine en haut à gauche).
 
 ## Image de la carte
-- Source : `GUI_Map.dds` dans l'installation Kenshi.
-- Conversion : `magick GUI_Map.dds -quality 85 assets/map/kenshi-map.jpg`
-- Indiquer la taille dans `data/map.json`.
+- Source : `data/gui/gfx/GUI_Map.dds` dans l'installation Kenshi (8192 × 8192 px).
+- Découpée en tuiles (zoom 0 à 5) avec `tools/make_tiles.py` → `assets/map/tiles/`.
+- Réglages dans `data/map.json`.
 
 Autres sources possibles (couches alternatives) :
 - **Nice Map [Zones + Zone names + Roads]** (Djeeshka) — l'auteur autorise les modifications avec mention.

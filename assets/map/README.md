@@ -1,7 +1,8 @@
-# Image de la carte / Map image
+# Carte / Map
 
-Place ici `kenshi-map.jpg` (converti depuis `GUI_Map.dds` du jeu), puis mets sa largeur et sa hauteur dans `data/map.json`.
+Tuiles générées depuis `data/gui/gfx/GUI_Map.dds` du jeu (8192 × 8192 px), zoom 0 à 5, tuiles 256 px.
+Tiles generated from the game's `data/gui/gfx/GUI_Map.dds` (8192 × 8192 px), zoom 0–5, 256 px tiles.
 
-Put `kenshi-map.jpg` here (converted from the game's `GUI_Map.dds`), then set its width and height in `data/map.json`.
+Régénérer / Regenerate : `python3 tools/make_tiles.py GUI_Map.dds assets/map/tiles 5`
 
-Conversion : `magick GUI_Map.dds -quality 85 kenshi-map.jpg`
+Kenshi © Lo-Fi Games.
