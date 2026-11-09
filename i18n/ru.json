@@ -220,5 +220,6 @@
   "merc.status_declined": "❌ Отклонён",
   "merc.status_cancelled": "Отменён",
   "err.cannot_hire": "Ваша роль не позволяет нанимать наёмников.",
-  "err.mercenary_unavailable": "Этот наёмник больше недоступен."
+  "err.mercenary_unavailable": "Этот наёмник больше недоступен.",
+  "footer.feedback": "🐞 Сообщить об ошибке / предложить идею"
 }

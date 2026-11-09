@@ -220,5 +220,6 @@
   "merc.status_declined": "❌ Refusée",
   "merc.status_cancelled": "Annulée",
   "err.cannot_hire": "Ton rôle ne permet pas d'engager un mercenaire.",
-  "err.mercenary_unavailable": "Ce mercenaire n'est plus disponible."
+  "err.mercenary_unavailable": "Ce mercenaire n'est plus disponible.",
+  "footer.feedback": "🐞 Signaler un bug / proposer une idée"
 }

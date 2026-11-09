@@ -81,6 +81,9 @@ See the [Wiki](../../wiki) (mirror in [`docs/wiki/`](docs/wiki)).
 
 ---
 
+## Bugs & idées / Bugs & ideas
+🐞 [Signaler un bug / Report a bug](../../issues/new?template=bug_report.yml) · 💡 [Proposer une idée / Suggest an idea](../../issues/new?template=feature_request.yml)
+
 ## Crédits / Credits
 - 💡 Idée / Idea: **Akumetsu**
 - 🤖 Conçu avec / Built with: **Claude** (Anthropic)

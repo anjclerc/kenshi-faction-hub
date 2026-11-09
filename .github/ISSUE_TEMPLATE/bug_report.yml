@@ -1,0 +1,28 @@
+name: 🐞 Bug report / Signaler un bug
+description: Something doesn't work as expected. / Quelque chose ne fonctionne pas.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened? / Que s'est-il passé ?
+      placeholder: "Ex: I clicked 'Leave the faction' and nothing happened."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / Étapes pour reproduire
+      placeholder: |
+        1. Open the site
+        2. Click on…
+  - type: input
+    id: browser
+    attributes:
+      label: Browser / Navigateur
+      placeholder: "Chrome, Firefox, Steam overlay…"
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot (optional) / Capture d'écran (facultatif)
+      description: Drag and drop an image here. / Glisse une image ici.

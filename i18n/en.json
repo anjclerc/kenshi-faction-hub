@@ -220,5 +220,6 @@
   "merc.status_declined": "❌ Declined",
   "merc.status_cancelled": "Cancelled",
   "err.cannot_hire": "Your role cannot hire a mercenary.",
-  "err.mercenary_unavailable": "This mercenary is no longer available."
+  "err.mercenary_unavailable": "This mercenary is no longer available.",
+  "footer.feedback": "🐞 Report a bug / suggest an idea"
 }

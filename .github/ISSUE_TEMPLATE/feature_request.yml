@@ -1,0 +1,14 @@
+name: 💡 Feature idea / Proposer une idée
+description: Suggest a new feature or an improvement. / Proposer une fonctionnalité ou une amélioration.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea / Ton idée
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why would it help your faction? / En quoi ça aiderait ta faction ?
