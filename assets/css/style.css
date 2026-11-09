@@ -50,7 +50,7 @@ nav { display: flex; align-items: center; gap: .5rem; }
   background: var(--bg); color: var(--text); border: 1px solid var(--accent);
   padding: .3rem .6rem; cursor: pointer; text-decoration: none; display: inline-block;
 }
-button.discord, a.button.discord { background: #5865f2; border-color: #5865f2; color: #fff; }
+#auth button.discord, #panel button.discord, a.button.discord { background: #5865f2; border-color: #5865f2; color: #fff; }
 main { position: relative; }
 #panel {
   position: absolute; top: 0; right: 0; bottom: 0; width: min(420px, 100%); z-index: 1000;
