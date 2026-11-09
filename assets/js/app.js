@@ -43,6 +43,8 @@ const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g,
     bounds, noWrap: true, maxNativeZoom: Z, maxZoom: Z + 1,
     attribution: 'Kenshi © Lo-Fi Games'
   }).addTo(map);
+  // Crédit Leaflet sans le drapeau ajouté par défaut (pas de contenu politique sur le site).
+  map.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
   map.fitBounds(bounds);
   map.setMaxBounds(bounds.pad(0.2));
 
