@@ -305,5 +305,16 @@
   "search.placeholder": "🔍 Search a place, a marker…",
   "nav.layers": "☰ Layers",
   "marker.edit": "Edit",
-  "marker.delete_confirm": "Delete this marker?"
+  "marker.delete_confirm": "Delete this marker?",
+  "hook.title": "Announcements on the faction's Discord",
+  "hook.hint": "In Discord: Channel settings → Integrations → Webhooks → New webhook → Copy URL, then paste it here. Only managers can see this address.",
+  "hook.url": "Webhook URL",
+  "hook.lang": "Message language",
+  "hook.events": "Announce",
+  "hook.ev_vote": "🗳️ New votes and raids",
+  "hook.ev_result": "✅ Vote results",
+  "hook.ev_member": "👋 New members",
+  "hook.ev_join": "📨 Join requests",
+  "hook.test": "Send a test message",
+  "hook.test_sent": "Test message sent: check your Discord channel."
 }

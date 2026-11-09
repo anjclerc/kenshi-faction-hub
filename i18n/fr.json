@@ -305,5 +305,16 @@
   "search.placeholder": "🔍 Rechercher un lieu, un marqueur…",
   "nav.layers": "☰ Calques",
   "marker.edit": "Modifier",
-  "marker.delete_confirm": "Supprimer ce marqueur ?"
+  "marker.delete_confirm": "Supprimer ce marqueur ?",
+  "hook.title": "Annonces sur le Discord de la faction",
+  "hook.hint": "Dans Discord : Paramètres du salon → Intégrations → Webhooks → Nouveau webhook → Copier l'URL, puis colle-la ici. Seuls les gestionnaires voient cette adresse.",
+  "hook.url": "Adresse du webhook",
+  "hook.lang": "Langue des messages",
+  "hook.events": "Annoncer",
+  "hook.ev_vote": "🗳️ Nouveaux votes et raids",
+  "hook.ev_result": "✅ Résultats des votes",
+  "hook.ev_member": "👋 Nouveaux membres",
+  "hook.ev_join": "📨 Demandes d'adhésion",
+  "hook.test": "Envoyer un message de test",
+  "hook.test_sent": "Message de test envoyé : regarde ton salon Discord."
 }

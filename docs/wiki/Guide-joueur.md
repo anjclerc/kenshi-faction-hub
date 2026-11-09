@@ -10,6 +10,9 @@ Clique sur **Se connecter avec Discord** (en haut à droite). Ton pseudo Discord
 ## Créer une faction
 Panneau **Mon compte** → **Créer une faction** → nom + type (**Autoritaire** ou **Démocratique**). Tu en deviens le **Créateur**.
 
+## Demander à rejoindre
+Sans lien d'invitation : **Demander à rejoindre une faction** (choix de la faction + petit message). Le Créateur (ou le Chef en démocratique) accepte ou refuse dans la fiche de la faction (pastille rouge).
+
 ## Inviter des joueurs (Créateur)
 **Gérer la faction** → **Générer un lien** (durée et nombre d'utilisations réglables). Le lien est copié : envoie-le sur Discord.
 Le joueur qui l'ouvre se connecte et rejoint la faction comme **Nouveau venu**.
@@ -35,3 +38,11 @@ Onglet **Votes** (bouton en haut ; le chiffre rouge = votes en attente de ta voi
 - **Résultat** : adoptée si plus de « Pour » que de « Contre » à la fin (durée réglable, 48 h par défaut).
 - **Faction autoritaire** : votes consultatifs, sauf changement de type, dissolution et destitution qui s'appliquent automatiquement.
 - Les heures s'affichent dans le fuseau de chaque joueur.
+
+## Carte : recherche et modification
+- **🔍 Rechercher** (en haut du panneau de gauche) : une ville, un marqueur ou un territoire ; la carte s'y déplace.
+- **Modifier un marqueur** : clique dessus → ✏️ Modifier (nom, type, visibilité, base principale).
+- Sur téléphone : bouton **☰ Calques** pour ouvrir le panneau.
+
+## Annonces Discord (Créateur / Chef)
+Gérer la faction → **Annonces sur le Discord de la faction** : colle l'adresse d'un webhook Discord (Paramètres du salon → Intégrations → Webhooks). Le site annonce automatiquement les nouveaux votes et raids (à l'heure locale de chacun), les résultats, les nouveaux membres et les demandes d'adhésion. Bouton **Envoyer un message de test** pour vérifier.

@@ -10,7 +10,7 @@
   const state = { user: null, profile: null, membership: null, faction: null, parent: null, members: [], history: [], invite: null, inviteInfo: null,
     tab: 'faction', previewRole: null, proposals: [], myVotes: {}, draft: {},
     mercs: [], myMerc: null, hires: [], hireDraft: {},
-    relations: [], factions: [], independents: [], territories: [], drawing: null, joinRequests: [], markerData: [] };
+    relations: [], factions: [], independents: [], territories: [], drawing: null, joinRequests: [], markerData: [], secrets: null };
   const dbMarkers = [];
   const raidMarkers = [];
 
@@ -93,6 +93,7 @@
         state.faction = f.data;
         state.members = mem.data ?? [];
         await loadProposals();
+        state.secrets = (await sb.from('faction_secrets').select('*').maybeSingle()).data;   // gestionnaires seulement
         if (state.faction?.parent_id) {
           state.parent = (await sb.from('factions').select('name').eq('id', state.faction.parent_id).maybeSingle()).data;
         }
@@ -357,11 +358,26 @@
       <label class="inline">${esc(t('vote.hours'))} <input id="f-hours" type="number" min="1" max="336" value="${f.vote_hours ?? 48}"></label>
       <label class="inline">${esc(t('vote.inactivity'))} <input id="f-inact" type="number" min="3" max="90" value="${f.inactivity_days ?? 14}"></label>
       <button data-act="save-faction">${esc(t('acc.save'))}</button>
+      ${webhookHtml()}
       <h3>${esc(t('acc.invite_title'))}</h3>
       <label class="inline">${esc(t('acc.invite_days'))} <input id="i-days" type="number" min="1" max="90" value="7"></label>
       <label class="inline">${esc(t('acc.invite_uses'))} <input id="i-uses" type="number" min="1" max="500" value="10"></label>
       <button data-act="invite">${esc(t('acc.invite_create'))}</button>
       <input id="i-link" readonly hidden></details>`;
+  }
+
+  const HOOK_EVENTS = ['vote', 'result', 'member', 'join'];
+  function webhookHtml() {
+    const w = state.secrets ?? { lang: I18N.lang, events: HOOK_EVENTS };
+    return `<h3>📣 ${esc(t('hook.title'))}</h3>
+      <p class="hint">${esc(t('hook.hint'))}</p>
+      <label>${esc(t('hook.url'))} <input id="w-url" type="password" autocomplete="off" placeholder="https://discord.com/api/webhooks/…" value="${esc(w.discord_webhook)}"></label>
+      <label>${esc(t('hook.lang'))} <select id="w-lang">${['fr', 'en', 'ru'].map(l =>
+        `<option value="${l}" ${w.lang === l ? 'selected' : ''}>${{ fr: 'Français', en: 'English', ru: 'Русский' }[l]}</option>`).join('')}</select></label>
+      <fieldset><legend>${esc(t('hook.events'))}</legend>${HOOK_EVENTS.map(e => `<label class="inline"><input type="checkbox" name="w-ev" value="${e}"
+        ${w.events.includes(e) ? 'checked' : ''}> ${esc(t('hook.ev_' + e))}</label>`).join('')}</fieldset>
+      <button data-act="save-hook">${esc(t('acc.save'))}</button>
+      ${state.secrets?.discord_webhook ? `<button data-act="test-hook">${esc(t('hook.test'))}</button>` : ''}`;
   }
 
   function membersHtml() {
@@ -704,6 +720,16 @@
     async 'terr-delete'(btn) {
       if (!await askConfirm(t('terr.delete_confirm'))) return;
       if (await call(sb.from('territories').delete().eq('id', +btn.dataset.id))) loadTerritories();
+    },
+    async 'save-hook'() {
+      const ok = await call(sb.from('faction_secrets').upsert({
+        faction_id: state.faction.id, discord_webhook: $('#w-url').value.trim() || null, lang: $('#w-lang').value,
+        events: [...document.querySelectorAll('input[name=w-ev]:checked')].map(i => i.value), updated_at: new Date().toISOString()
+      }));
+      if (ok) { say(t('acc.saved')); state.secrets = (await sb.from('faction_secrets').select('*').maybeSingle()).data; renderPanel(); }
+    },
+    async 'test-hook'() {
+      if (await call(sb.rpc('test_webhook'))) say(t('hook.test_sent'));
     },
     async 'join-request'() {
       if ($('#p-game') && !await saveProfileFromForm()) return;   // portail : pseudo en jeu obligatoire
