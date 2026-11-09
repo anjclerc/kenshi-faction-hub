@@ -1,0 +1,27 @@
+name: Sync Wiki
+
+# Copie docs/wiki/ vers le Wiki GitHub à chaque modification.
+# Prérequis : créer une première page dans l'onglet Wiki (une seule fois).
+on:
+  push:
+    branches: [main]
+    paths: ['docs/wiki/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Push docs/wiki vers le Wiki
+        run: |
+          git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git" wiki
+          rsync -a --delete --exclude .git docs/wiki/ wiki/
+          cd wiki
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || { git commit -m "Sync wiki depuis docs/wiki"; git push; }
