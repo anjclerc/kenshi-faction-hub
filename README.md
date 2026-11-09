@@ -30,7 +30,7 @@ Un site web pour les joueurs qui jouent à Kenshi en multijoueur, avec le mod [A
 | 5 | Intégration en jeu (selon l'accord de l'auteur d'AnarchyKenshi) | 💭 |
 
 ### Base de données (Supabase)
-Exécuter dans l'ordre dans *SQL Editor* : `supabase/schema.sql`, `supabase/002_votes.sql`, `supabase/003_delete_empty.sql`, `supabase/004_mercenaries.sql`, `supabase/005_alliances.sql`, `supabase/006_quotas.sql`, `supabase/007_territories.sql`.
+Exécuter dans l'ordre dans *SQL Editor* : `supabase/schema.sql`, `supabase/002_votes.sql`, `supabase/003_delete_empty.sql`, `supabase/004_mercenaries.sql`, `supabase/005_alliances.sql`, `supabase/006_quotas.sql`, `supabase/007_territories.sql` … `supabase/010_hardening.sql` (dans l’ordre des numéros).
 
 ### Utiliser en jeu
 Ouvre le site dans le **navigateur de l'overlay Steam** (`Maj` + `Tab`).
