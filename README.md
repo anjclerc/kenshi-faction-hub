@@ -14,6 +14,7 @@
 Un site web pour les joueurs qui jouent à Kenshi en multijoueur, avec le mod [AnarchyKenshi](https://github.com/madscism-collab/AnarchyKenshi-Client).
 - Gérer sa **faction** : nom, couleur, blason, bases, territoire.
 - Gérer les **membres** avec des **rôles** : Créateur, Architecte, Milicien, Diplomate, Marchand, Forgeron, Fermier, Mineur, Médecin, Éclaireur, Recrue.
+- Relier chaque joueur à son **pseudo en jeu** et son **pseudo Discord**, et afficher le **Discord de la faction**.
 - Gérer la **diplomatie** : alliés (*white list*), neutres, ennemis (*black list*).
 - Tout voir sur une **carte interactive** du monde de Kenshi.
 - Site **multilingue** : français, anglais, russe.
@@ -22,7 +23,7 @@ Un site web pour les joueurs qui jouent à Kenshi en multijoueur, avec le mod [A
 | # | Étape | Statut |
 |---|---|---|
 | 1 | Carte interactive (Leaflet) + villes + multilingue | 🚧 En cours |
-| 2 | Comptes, factions, rôles et permissions (Supabase) | ⏳ |
+| 2 | Comptes, factions, rôles et permissions (Supabase) + pseudo en jeu, pseudo Discord, lien Discord de la faction | ⏳ |
 | 3 | Diplomatie white/black list, couleurs sur la carte | ⏳ |
 | 4 | Mise en ligne GitHub Pages | ⏳ |
 | 5 | Intégration en jeu (selon l'accord de l'auteur d'AnarchyKenshi) | 💭 |
@@ -47,6 +48,7 @@ Tout est dans le [Wiki](../../wiki) (copie dans [`docs/wiki/`](docs/wiki)).
 A website for players running Kenshi in multiplayer with the [AnarchyKenshi](https://github.com/madscism-collab/AnarchyKenshi-Client) mod.
 - Manage your **faction**: name, colour, banner, bases, territory.
 - Manage **members** with **roles**: Founder, Architect, Militia, Diplomat, Trader, Smith, Farmer, Miner, Medic, Scout, Recruit.
+- Link each player to their **in-game name** and **Discord name**, and show the **faction's Discord**.
 - Handle **diplomacy**: allies (*white list*), neutral, enemies (*black list*).
 - See everything on an **interactive map** of the Kenshi world.
 - **Multilingual**: French, English, Russian.
@@ -55,7 +57,7 @@ A website for players running Kenshi in multiplayer with the [AnarchyKenshi](htt
 | # | Step | Status |
 |---|---|---|
 | 1 | Interactive map (Leaflet) + towns + i18n | 🚧 In progress |
-| 2 | Accounts, factions, roles & permissions (Supabase) | ⏳ |
+| 2 | Accounts, factions, roles & permissions (Supabase) + in-game name, Discord name, faction Discord link | ⏳ |
 | 3 | Diplomacy white/black list, colours on the map | ⏳ |
 | 4 | Publish on GitHub Pages | ⏳ |
 | 5 | In-game integration (depends on the AnarchyKenshi author) | 💭 |

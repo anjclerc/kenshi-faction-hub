@@ -18,3 +18,11 @@ Un membre peut avoir un rôle principal + des métiers.
 | **Recrue** | Nouveau membre | Lecture seule |
 
 > Les rôles et droits sont configurables (étape 2 du MVP).
+
+## Profil d'un membre
+- **Pseudo en jeu** (compte AnarchyKenshi)
+- **Pseudo Discord** — pour se contacter facilement
+- Rôle principal + métiers
+
+## Fiche de la faction
+- **Lien d'invitation Discord** de la faction (modifiable par le Créateur et le Diplomate), affiché avec un bouton « Rejoindre le Discord ».
