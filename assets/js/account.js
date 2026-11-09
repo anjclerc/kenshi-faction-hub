@@ -161,6 +161,20 @@
     state.proposals = pr.data ?? [];
     state.myVotes = Object.fromEntries((v.data ?? []).map(x => [x.proposal_id, x.choice]));
   }
+  // Votes à jour sans recharger (vote depuis Discord ou par un autre membre) :
+  // toutes les 20 s quand la page est visible, et dès qu'on revient sur l'onglet.
+  async function refreshProposals() {
+    if (!state.user || !state.faction || document.hidden) return;
+    const sig = () => JSON.stringify([state.proposals.map(p => [p.id, p.status, p.yes_count, p.no_count, p.abstain_count]), state.myVotes]);
+    const before = sig();
+    await loadProposals();
+    if (sig() === before) return;
+    renderHeader();
+    const typing = document.activeElement?.closest?.('#panel') && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+    if (state.tab === 'votes' && !$('#panel').hidden && !typing) renderPanel();
+  }
+  setInterval(refreshProposals, 20000);
+  document.addEventListener('visibilitychange', refreshProposals);
   const canVote = () => !!state.faction && state.faction.voting_roles.includes(myRole());
   const openProposals = () => state.proposals.filter(p => p.status === 'open');
   const memberName = id => {

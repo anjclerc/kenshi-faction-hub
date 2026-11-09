@@ -62,6 +62,7 @@ async function discord(method: string, path: string, body?: unknown) {
     return discord(method, path, body);
   }
   const data = res.status === 204 ? null : await res.json().catch(() => null);
+  if (!res.ok) console.error('discord', method, path.replace(/\d{17,}/g, 'ID'), res.status, JSON.stringify(data).slice(0, 300));
   return { ok: res.ok, status: res.status, data };
 }
 const parseChannel = (url: string) => {
