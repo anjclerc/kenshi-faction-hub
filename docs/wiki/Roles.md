@@ -9,7 +9,8 @@ Un membre peut avoir un rôle principal + des métiers.
 | **Chef** | Dirigeant (régime démocratique) | Gère la faction comme le Créateur (sauf toucher au Créateur) |
 | **Élu** | Membre élu | Vote |
 | **Mercenaire** | Combattant à louer | Peut proposer ses services dans le pool |
-| **Architecte** | Bâtisseur | Gère les bases et le territoire sur la carte |
+| **Architecte** | Bâtisseur | Gère les bases et trace les territoires |
+| **Cartographe** | Carte | Trace les territoires de la faction |
 | **Diplomate** | Relations extérieures | Gère la white list / black list |
 | **Milicien** | Défense | Signale les menaces et zones de combat sur la carte |
 | **Marchand** | Commerce | Gère les routes et points de commerce |

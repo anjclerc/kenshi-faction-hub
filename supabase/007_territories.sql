@@ -43,3 +43,13 @@ create trigger guard_quota before insert on public.territories
 
 revoke execute on function public.can_draw from public, anon;
 grant execute on function public.can_draw to authenticated;
+
+-- Rôle Cartographe : peut tracer les territoires (comme l'Architecte).
+alter table public.memberships drop constraint if exists memberships_role_check;
+alter table public.memberships add constraint memberships_role_check check (role in (
+  'createur', 'chef', 'elu', 'conseiller', 'architecte', 'cartographe', 'diplomate', 'milicien', 'mercenaire', 'citoyen',
+  'marchand', 'forgeron', 'fermier', 'mineur', 'medecin', 'eclaireur', 'nouveau'));
+create or replace function public.can_draw() returns boolean
+language sql stable security definer set search_path = '' as $$
+  select public.is_manager() or public.my_role() in ('architecte', 'cartographe')
+$$;

@@ -2,7 +2,7 @@
 // Toute la sécurité est côté base (règles RLS + fonctions) : ce fichier ne fait qu'afficher et appeler.
 (() => {
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const ROLES = ['createur', 'chef', 'elu', 'conseiller', 'architecte', 'diplomate', 'milicien', 'mercenaire',
+  const ROLES = ['createur', 'chef', 'elu', 'conseiller', 'architecte', 'cartographe', 'diplomate', 'milicien', 'mercenaire',
     'citoyen', 'marchand', 'forgeron', 'fermier', 'mineur', 'medecin', 'eclaireur', 'nouveau'];
   const TAGS = ['pvp', 'marchande', 'mercenaires', 'exploration', 'agriculture', 'artisanat', 'roleplay'];
   const SITE = location.origin + location.pathname;
@@ -26,7 +26,7 @@
   const isSolo = () => !state.faction && !!state.profile?.solo;
   const myParty = () => state.faction ? 'f:' + state.faction.id : 'p:' + state.user?.id;
   const canDiplo = () => !state.faction || isManager() || myRole() === 'diplomate';
-  const canDraw = () => !!state.faction && (isManager() || myRole() === 'architecte');
+  const canDraw = () => !!state.faction && (isManager() || ['architecte', 'cartographe'].includes(myRole()));
   const canHire = () => !state.faction || ['createur', 'chef', 'diplomate'].includes(myRole());
 
   function say(msg, isError = false) {

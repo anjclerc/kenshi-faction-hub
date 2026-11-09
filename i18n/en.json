@@ -276,5 +276,6 @@
   "terr.ally": "ally",
   "terr.enemy": "⚠ enemy",
   "terr.neutral": "neutral",
-  "err.quota_territories": "Limit of 20 territories reached."
+  "err.quota_territories": "Limit of 20 territories reached.",
+  "role.cartographe": "Cartographer"
 }

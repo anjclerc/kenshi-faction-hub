@@ -276,5 +276,6 @@
   "terr.ally": "союзник",
   "terr.enemy": "⚠ враг",
   "terr.neutral": "нейтральная",
-  "err.quota_territories": "Достигнут лимит в 20 территорий."
+  "err.quota_territories": "Достигнут лимит в 20 территорий.",
+  "role.cartographe": "Картограф"
 }
