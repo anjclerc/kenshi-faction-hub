@@ -39,6 +39,8 @@ Onglet **Votes** (bouton en haut ; le chiffre rouge = votes en attente de ta voi
 - **Résultat** : adoptée si plus de « Pour » que de « Contre » à la fin (durée réglable, 48 h par défaut).
 - **Faction autoritaire** : votes consultatifs, sauf changement de type, dissolution et destitution qui s'appliquent automatiquement.
 - Les heures s'affichent dans le fuseau de chaque joueur.
+- **Mise à jour automatique** : les totaux se rafraîchissent tout seuls (toutes les 20 s et au retour sur l'onglet), y compris pour les votes faits depuis Discord.
+- **Historique** : les 15 derniers votes terminés restent affichés sous les votes en cours, avec leur résultat. Les votes terminés sont supprimés après **90 jours** (limite de l'offre gratuite) ; sur Discord, le message reste.
 
 ## Carte : recherche et modification
 - **🔍 Rechercher** (en haut du panneau de gauche) : une ville, un marqueur ou un territoire ; la carte s'y déplace.

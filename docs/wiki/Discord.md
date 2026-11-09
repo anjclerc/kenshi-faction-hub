@@ -25,6 +25,7 @@ Les heures des raids s'affichent dans le fuseau de chaque lecteur. L'adresse du 
 2. Sur Discord : Paramètres du serveur → **Rôles** → glisse le rôle **Kenshi Faction Hub** **au-dessus** des rôles qu'il doit gérer.
 3. Clic droit sur un salon → **Copier le lien**, puis colle-le sur le site. Un salon **forum** est conseillé : chaque vote devient un fil.
 4. Coche **Rôles** et/ou **Surnoms** → **Enregistrer** → **Synchroniser maintenant**.
+5. Quelques secondes plus tard, un **compte rendu** s'affiche sous le bouton : rôles présents sur le serveur, membres synchronisés, membres absents du serveur, membres jamais connectés au site avec Discord, surnoms refusés, erreurs (avec la marche à suivre).
 
 Ce que fait le bot :
 - **Rôles** : il crée les rôles de la faction dans la langue choisie pour les annonces (Chef, Citoyen, Nouveau venu…) et les attribue. Un changement de rôle sur le site est répercuté tout de suite ; un membre qui quitte la faction perd son rôle.
