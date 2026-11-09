@@ -26,7 +26,7 @@
   const isSolo = () => !state.faction && !!state.profile?.solo;
   const myParty = () => state.faction ? 'f:' + state.faction.id : 'p:' + state.user?.id;
   const canDiplo = () => !state.faction || isManager() || myRole() === 'diplomate';
-  const canDraw = () => !!state.faction && (isManager() || ['architecte', 'cartographe'].includes(myRole()));
+  const canDraw = () => !!state.faction && (isManager() || myRole() === 'cartographe');
   const canHire = () => !state.faction || ['createur', 'chef', 'diplomate'].includes(myRole());
 
   function say(msg, isError = false) {
