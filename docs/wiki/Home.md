@@ -13,8 +13,8 @@ Site de gestion de factions pour **Kenshi multijoueur** (mod AnarchyKenshi).
 - [[Contribuer|Contribuer]] — participer au projet
 
 ## Feuille de route
-1. Carte interactive + villes + multilingue 🚧
-2. Comptes, factions, rôles (Supabase) + pseudo en jeu, pseudo Discord, lien Discord de la faction ⏳
+1. Carte interactive + 304 lieux du jeu + marqueurs + multilingue ✅
+2. Comptes, factions, rôles (Supabase) + pseudo en jeu modifiable, pseudo Discord, Discord de la faction, invitation par lien ⏳
 3. Diplomatie sur la carte ⏳
 4. Mise en ligne GitHub Pages ⏳
 5. Intégration en jeu 💭

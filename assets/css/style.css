@@ -29,6 +29,14 @@ aside h2 { font-size: 1rem; margin-top: 0; }
 .hint { font-size: .8rem; opacity: .7; }
 #coords { font-family: monospace; color: var(--accent); }
 #map { flex: 1; background: #3b342b; }
+aside { overflow-y: auto; }
+aside label { display: block; margin: .2rem 0; }
+.swatch { display: inline-block; width: .7rem; height: .7rem; border-radius: 50%; border: 1px solid #000; }
+aside select, aside input[type=text], aside button, aside textarea {
+  width: 100%; margin: .2rem 0; background: var(--bg); color: var(--text); border: 1px solid var(--accent);
+}
+aside button { cursor: pointer; padding: .3rem; }
+aside textarea { font-family: monospace; font-size: .75rem; resize: vertical; }
 select { background: var(--bg); color: var(--text); border: 1px solid var(--accent); }
 
 @media (max-width: 700px) {

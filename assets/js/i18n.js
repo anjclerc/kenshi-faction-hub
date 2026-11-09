@@ -12,6 +12,9 @@ const I18N = {
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = this.t(el.dataset.i18n);
     });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      el.placeholder = this.t(el.dataset.i18nPlaceholder);
+    });
   },
 
   t(key) {

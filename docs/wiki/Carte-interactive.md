@@ -13,12 +13,25 @@ Autres sources possibles (couches alternatives) :
 
 > Les mods « map améliorée » sont uniquement des images : ils ne contiennent pas de coordonnées de villes.
 
-## Ajouter une ville
-1. Ouvre le site et **clique** à l'endroit de la ville : les coordonnées s'affichent.
-2. Ajoute une entrée dans `data/towns.json` :
-```json
-{ "name": "The Hub", "faction": "—", "x": 1234, "y": 2345 }
-```
-3. Fais une Pull Request.
+## Lieux du jeu (`data/towns.json`)
+**304 lieux** extraits directement des fichiers du jeu (positions exactes, noms identiques au wiki Fandom) avec `tools/extract_towns.py`.
 
-Source des noms : [Kenshi Wiki](https://kenshi.fandom.com) (CC BY-SA).
+| Calque | Contenu |
+|---|---|
+| Villes | Villes et avant-postes (The Hub, Squin, Admag, Heng…) |
+| Villages | Villages (Hive, Holy Farm, Swamp…) |
+| Ruines (loot) | Ruines, labos, armureries — zones intéressantes à piller |
+| Camps | Camps de bandits, esclavagistes, tours |
+| Forteresses | Forteresses (Okran's Shield, The Great Fortress…) |
+| Nids (danger) | Nids de créatures (masqué par défaut) |
+
+Conversion monde → carte : `pixel = (coordonnée monde + 147456) / 36` (monde de 64 zones × 4608 unités).
+
+## Marqueurs des joueurs (`data/markers.json`)
+Types : Notre base, Cité alliée, Base alliée, Base ennemie, Zone de loot, Ressources, Danger, Autre.
+
+1. Dans le panneau **Ajouter un marqueur**, choisis le type et un nom.
+2. Clique sur **Placer sur la carte**, puis sur l'endroit voulu.
+3. Copie la ligne affichée dans `data/markers.json` et fais une Pull Request.
+
+> À l'étape 2 (comptes), les marqueurs seront enregistrés en ligne directement, avec des droits selon le rôle.

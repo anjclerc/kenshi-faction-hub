@@ -22,8 +22,8 @@ Un site web pour les joueurs qui jouent à Kenshi en multijoueur, avec le mod [A
 ### Feuille de route (MVP)
 | # | Étape | Statut |
 |---|---|---|
-| 1 | Carte interactive (Leaflet) + villes + multilingue | 🚧 En cours |
-| 2 | Comptes, factions, rôles et permissions (Supabase) + pseudo en jeu, pseudo Discord, lien Discord de la faction | ⏳ |
+| 1 | Carte interactive (Leaflet) + 304 lieux du jeu + marqueurs + multilingue | ✅ |
+| 2 | Comptes, factions, rôles (Supabase) + pseudo en jeu modifiable, pseudo Discord, Discord de la faction, invitation par lien | ⏳ |
 | 3 | Diplomatie white/black list, couleurs sur la carte | ⏳ |
 | 4 | Mise en ligne GitHub Pages | ⏳ |
 | 5 | Intégration en jeu (selon l'accord de l'auteur d'AnarchyKenshi) | 💭 |
@@ -56,8 +56,8 @@ A website for players running Kenshi in multiplayer with the [AnarchyKenshi](htt
 ### Roadmap (MVP)
 | # | Step | Status |
 |---|---|---|
-| 1 | Interactive map (Leaflet) + towns + i18n | 🚧 In progress |
-| 2 | Accounts, factions, roles & permissions (Supabase) + in-game name, Discord name, faction Discord link | ⏳ |
+| 1 | Interactive map (Leaflet) + 304 in-game places + markers + i18n | ✅ |
+| 2 | Accounts, factions, roles (Supabase) + editable in-game name, Discord name, faction Discord, invite links | ⏳ |
 | 3 | Diplomacy white/black list, colours on the map | ⏳ |
 | 4 | Publish on GitHub Pages | ⏳ |
 | 5 | In-game integration (depends on the AnarchyKenshi author) | 💭 |
