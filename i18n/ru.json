@@ -259,5 +259,22 @@
   "preview.label": "Смотреть сайт как:",
   "preview.none": "— я (Основатель) —",
   "preview.banner": "Предпросмотр (только отображение) как",
-  "preview.stop": "Выйти из предпросмотра"
+  "preview.stop": "Выйти из предпросмотра",
+  "layers.territories": "Территории",
+  "terr.title": "Наши территории",
+  "terr.name": "Название новой территории",
+  "terr.draw": "Нарисовать на карте",
+  "terr.draw_hint": "Отметьте углы территории на карте.",
+  "terr.points": "Углы",
+  "terr.done": "Готово",
+  "terr.cancel": "Отмена",
+  "terr.min3": "Нужно минимум 3 угла.",
+  "terr.saved": "Территория сохранена.",
+  "terr.name_required": "Дайте территории название.",
+  "terr.delete_confirm": "Удалить эту территорию?",
+  "terr.own": "наша территория",
+  "terr.ally": "союзник",
+  "terr.enemy": "⚠ враг",
+  "terr.neutral": "нейтральная",
+  "err.quota_territories": "Достигнут лимит в 20 территорий."
 }

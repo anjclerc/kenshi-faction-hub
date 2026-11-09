@@ -67,6 +67,8 @@ const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g,
     .bindTooltip(() => `${escapeHtml(m.name)} (${I18N.t('marker.' + m.type)})`).addTo(markerLayer);
   markers.forEach(addMarker);
   layers.markers = { color: '#ffffff', group: markerLayer, on: true };
+  const territoryLayer = L.layerGroup();
+  layers.territories = { color: '#c8862e', group: territoryLayer, on: true };
 
   // Cases à cocher des calques.
   const box = document.getElementById('layers');
@@ -121,7 +123,7 @@ const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g,
   });
 
   // Accès pour le module compte (account.js).
-  Object.assign(KFH, { map, dot, toLatLng, markerLayer, MARKER_STYLES });
+  Object.assign(KFH, { map, dot, toLatLng, markerLayer, territoryLayer, MARKER_STYLES });
   document.dispatchEvent(new Event('kfh:map-ready'));
 
   // Langue.

@@ -42,6 +42,11 @@
       <textarea id="marker-json" readonly rows="3"></textarea>
     </aside>
     <div id="map"></div>
+    <div id="draw-bar" hidden>
+      <span data-i18n="terr.draw_hint">Clique les coins du territoire sur la carte.</span> <b id="draw-count"></b>
+      <button data-act="terr-done" data-i18n="terr.done">Terminer</button>
+      <button data-act="terr-cancel" class="link" data-i18n="terr.cancel">Annuler</button>
+    </div>
 
     <section id="panel" hidden>
       <button id="panel-close" aria-label="×">×</button>

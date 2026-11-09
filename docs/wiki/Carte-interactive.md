@@ -35,3 +35,14 @@ Types : Notre base, Cité alliée, Base alliée, Base ennemie, Zone de loot, Res
 3. Copie la ligne affichée dans `data/markers.json` et fais une Pull Request.
 
 > À l'étape 2 (comptes), les marqueurs seront enregistrés en ligne directement, avec des droits selon le rôle.
+
+## Territoires
+L'**Architecte**, le **Créateur** ou le **Chef** (démocratique) : *Faction* → *Nos territoires* → nom → **Tracer sur la carte**, clique les coins (3 minimum), puis **Terminer**. 20 territoires maximum par faction.
+
+Tout le monde voit les territoires ; l'apparence dépend de ta relation avec la faction :
+| Relation | Apparence |
+|---|---|
+| Notre faction | Bleu |
+| Alliée | Halo ambre chaleureux |
+| Ennemie | Rouge hachuré, bordure qui pulse |
+| Neutre | Gris en pointillés |

@@ -259,5 +259,22 @@
   "preview.label": "Voir le site comme :",
   "preview.none": "— moi (Créateur) —",
   "preview.banner": "Aperçu (affichage seulement) en tant que",
-  "preview.stop": "Quitter l'aperçu"
+  "preview.stop": "Quitter l'aperçu",
+  "layers.territories": "Territoires",
+  "terr.title": "Nos territoires",
+  "terr.name": "Nom du nouveau territoire",
+  "terr.draw": "Tracer sur la carte",
+  "terr.draw_hint": "Clique les coins du territoire sur la carte.",
+  "terr.points": "Coins",
+  "terr.done": "Terminer",
+  "terr.cancel": "Annuler",
+  "terr.min3": "Il faut au moins 3 coins.",
+  "terr.saved": "Territoire enregistré.",
+  "terr.name_required": "Donne un nom au territoire.",
+  "terr.delete_confirm": "Supprimer ce territoire ?",
+  "terr.own": "notre territoire",
+  "terr.ally": "allié",
+  "terr.enemy": "⚠ ennemi",
+  "terr.neutral": "neutre",
+  "err.quota_territories": "Limite de 20 territoires atteinte."
 }

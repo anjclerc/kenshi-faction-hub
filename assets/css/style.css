@@ -198,3 +198,15 @@ header h1 { font-size: 1.15rem; }
 #auth .who button.link:hover { color: var(--accent); }
 #panel .preview { margin-right: 1.8rem; }
 #auth .mainnav button.active { background: linear-gradient(var(--accent), #a76a22); color: var(--ink); border-color: var(--accent); }
+
+/* ───── Territoires ───── */
+#draw-bar {
+  position: absolute; top: .8rem; left: 50%; transform: translateX(-50%); z-index: 1500;
+  background: var(--panel) var(--grain); border: 1px solid var(--accent); padding: .5rem .9rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .6); white-space: nowrap;
+}
+#draw-bar button.link { background: none; border: 0; box-shadow: none; text-decoration: underline; color: var(--muted); }
+.terr-ally { filter: drop-shadow(0 0 6px rgba(232, 176, 74, .9)); stroke-linejoin: round; }
+.terr-enemy { animation: terr-pulse 2.2s ease-in-out infinite; }
+@keyframes terr-pulse { 0%, 100% { stroke-opacity: 1; stroke-width: 3; } 50% { stroke-opacity: .35; stroke-width: 6; } }
+@media (prefers-reduced-motion: reduce) { .terr-enemy { animation: none; } }

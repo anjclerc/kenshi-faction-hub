@@ -259,5 +259,22 @@
   "preview.label": "View the site as:",
   "preview.none": "— me (Founder) —",
   "preview.banner": "Preview (display only) as",
-  "preview.stop": "Stop preview"
+  "preview.stop": "Stop preview",
+  "layers.territories": "Territories",
+  "terr.title": "Our territories",
+  "terr.name": "New territory name",
+  "terr.draw": "Draw on the map",
+  "terr.draw_hint": "Click the corners of the territory on the map.",
+  "terr.points": "Corners",
+  "terr.done": "Finish",
+  "terr.cancel": "Cancel",
+  "terr.min3": "At least 3 corners are needed.",
+  "terr.saved": "Territory saved.",
+  "terr.name_required": "Give the territory a name.",
+  "terr.delete_confirm": "Delete this territory?",
+  "terr.own": "our territory",
+  "terr.ally": "ally",
+  "terr.enemy": "⚠ enemy",
+  "terr.neutral": "neutral",
+  "err.quota_territories": "Limit of 20 territories reached."
 }

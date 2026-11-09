@@ -10,7 +10,7 @@
   const state = { user: null, profile: null, membership: null, faction: null, parent: null, members: [], history: [], invite: null, inviteInfo: null,
     tab: 'faction', previewRole: null, proposals: [], myVotes: {}, draft: {},
     mercs: [], myMerc: null, hires: [], hireDraft: {},
-    relations: [], factions: [], independents: [] };
+    relations: [], factions: [], independents: [], territories: [], drawing: null };
   const dbMarkers = [];
   const raidMarkers = [];
 
@@ -26,6 +26,7 @@
   const isSolo = () => !state.faction && !!state.profile?.solo;
   const myParty = () => state.faction ? 'f:' + state.faction.id : 'p:' + state.user?.id;
   const canDiplo = () => !state.faction || isManager() || myRole() === 'diplomate';
+  const canDraw = () => !!state.faction && (isManager() || myRole() === 'architecte');
   const canHire = () => !state.faction || ['createur', 'chef', 'diplomate'].includes(myRole());
 
   function say(msg, isError = false) {
@@ -111,6 +112,7 @@
     renderPanel();
     loadMarkers();
     drawRaidTargets();
+    loadTerritories();
   }
 
   async function loadDiplo() {
@@ -302,6 +304,7 @@
           `<option value="${r}" ${state.previewRole === r ? 'selected' : ''}>${esc(t('role.' + r))}</option>`).join('')}</select></label>`;
     }
     if (isManager()) html += manageHtml(f);
+    if (canDraw()) html += territoriesHtml();
     html += membersHtml();
 
     html += `<h3>${esc(t('acc.actions'))}</h3>`;
@@ -492,7 +495,76 @@
 
   async function relation(party, stance, share = null) {
     const ok = await call(sb.rpc('set_relation', { p_to: party, p_stance: stance, p_share: share }));
-    if (ok) { say(t('acc.saved')); await loadDiplo(); renderPanel(); loadMarkers(); }
+    if (ok) { say(t('acc.saved')); await loadDiplo(); renderPanel(); loadMarkers(); drawTerritories(); }
+  }
+
+  // ───────── Territoires ─────────
+  const TERR_STYLE = {
+    own:     { color: '#4a9be8', weight: 2, fillOpacity: .15, className: 'terr-own' },
+    ally:    { color: '#e8b04a', weight: 3, fillOpacity: .2, className: 'terr-ally' },
+    enemy:   { color: '#c0392b', weight: 3, fillOpacity: .55, dashArray: '10 6', className: 'terr-enemy' },
+    neutral: { color: '#9a8f80', weight: 2, fillOpacity: .06, dashArray: '4 6', className: 'terr-neutral' }
+  };
+  function stanceWith(fid) {
+    if (fid === state.faction?.id) return 'own';
+    if (!state.user) return 'neutral';
+    const me = myParty(), them = 'f:' + fid;
+    const mine = state.relations.find(r => r.from_party === me && r.to_party === them)?.stance;
+    const theirs = state.relations.find(r => r.from_party === them && r.to_party === me)?.stance;
+    if (mine === 'enemy' || theirs === 'enemy') return 'enemy';
+    if (mine === 'ally' && theirs === 'ally') return 'ally';
+    return 'neutral';
+  }
+  // Motif hachuré (défini une fois dans le SVG de la carte) pour les territoires ennemis.
+  function hatch(svg) {
+    if (svg.querySelector('#kfh-hatch')) return;
+    svg.insertAdjacentHTML('afterbegin', `<defs><pattern id="kfh-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="10" height="10" fill="#3a0d08" fill-opacity=".35"/><line x1="0" y1="0" x2="0" y2="10" stroke="#c0392b" stroke-width="4" stroke-opacity=".7"/></pattern></defs>`);
+  }
+  async function loadTerritories() {
+    if (!KFH.map) return;
+    const [{ data }, f] = await Promise.all([
+      sb.from('territories').select('*'),
+      state.factions.length ? { data: state.factions } : sb.from('factions').select('id, name, color, tags').eq('status', 'active')
+    ]);
+    if (!state.factions.length) state.factions = f.data ?? [];
+    state.territories = data ?? [];
+    drawTerritories();
+    if (state.tab === 'faction' && !$('#panel').hidden && !$('#panel').classList.contains('gate')) renderPanel();
+  }
+  function drawTerritories() {
+    KFH.territoryLayer.clearLayers();
+    for (const z of state.territories) {
+      const stance = stanceWith(z.faction_id);
+      const poly = L.polygon(z.points.map(([x, y]) => KFH.toLatLng(x, y)), TERR_STYLE[stance])
+        .bindTooltip(() => `<b>${esc(z.name)}</b><br>${esc(partyName('f:' + z.faction_id))} · ${esc(t('terr.' + stance))}`, { sticky: true })
+        .addTo(KFH.territoryLayer);
+      if (stance === 'enemy' && poly._path) { hatch(poly._path.ownerSVGElement); poly._path.setAttribute('fill', 'url(#kfh-hatch)'); }
+      poly.bringToBack();   // sous les marqueurs
+    }
+  }
+  function territoriesHtml() {
+    const mine = state.territories.filter(z => z.faction_id === state.faction.id);
+    return `<h3>🗺️ ${esc(t('terr.title'))} (${mine.length})</h3>
+      ${mine.map(z => `<p>${esc(z.name)}
+        <button data-act="terr-show" data-id="${z.id}" class="small">${esc(t('vote.show_target'))}</button>
+        <button data-act="terr-delete" data-id="${z.id}" class="small danger">${esc(t('marker.delete'))}</button></p>`).join('')}
+      <label>${esc(t('terr.name'))} <input id="t-name" maxlength="60"></label>
+      <button data-act="terr-draw">✏️ ${esc(t('terr.draw'))}</button>`;
+  }
+  // Mode tracé : chaque clic ajoute un coin ; barre « Terminer / Annuler » au-dessus de la carte.
+  function drawStep() {
+    const d = state.drawing;
+    $('#draw-count').textContent = `${t('terr.points')} : ${d.points.length}`;
+    d.line?.remove();
+    d.line = L.polygon(d.points.map(([x, y]) => KFH.toLatLng(x, y)), { color: '#e8b04a', dashArray: '4 4', fillOpacity: .1 }).addTo(KFH.map);
+    KFH.onPick = p => { d.points.push([p.x, p.y]); drawStep(); };
+  }
+  function drawEnd() {
+    state.drawing?.line?.remove();
+    state.drawing = null;
+    KFH.onPick = null;
+    $('#draw-bar').hidden = true;
   }
 
   // ───────── Mercenaires ─────────
@@ -573,6 +645,34 @@
     preview(btn) {
       state.previewRole = btn.dataset.role || null;
       renderHeader(); renderPanel(); loadMarkers();
+    },
+    'terr-draw'() {
+      const name = $('#t-name').value.trim();
+      if (!name) { say(t('terr.name_required'), true); $('#t-name').focus(); return; }
+      state.drawing = { name, points: [] };
+      $('#panel').hidden = true; renderHeader();
+      $('#draw-bar').hidden = false;
+      drawStep();
+    },
+    async 'terr-done'() {
+      const d = state.drawing;
+      if (!d || d.points.length < 3) { $('#draw-count').textContent = t('terr.min3'); return; }
+      const ok = await call(sb.from('territories').insert({
+        faction_id: state.faction.id, created_by: state.user.id, name: d.name, points: d.points
+      }));
+      drawEnd();
+      if (ok) { say(t('terr.saved')); await loadTerritories(); }
+      $('#panel').hidden = false; renderHeader();
+    },
+    'terr-cancel'() { drawEnd(); $('#panel').hidden = false; renderHeader(); },
+    'terr-show'(btn) {
+      const z = state.territories.find(x => x.id === +btn.dataset.id);
+      $('#panel').hidden = true; renderHeader();
+      KFH.map.fitBounds(L.latLngBounds(z.points.map(([x, y]) => KFH.toLatLng(x, y))), { padding: [40, 40] });
+    },
+    async 'terr-delete'(btn) {
+      if (!await askConfirm(t('terr.delete_confirm'))) return;
+      if (await call(sb.from('territories').delete().eq('id', +btn.dataset.id))) loadTerritories();
     },
     async 'd-ally'(btn) {
       const r = state.relations.find(x => x.from_party === myParty() && x.to_party === btn.dataset.party);
@@ -817,7 +917,7 @@
     if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') setTimeout(load, 0);
   });
   document.addEventListener('kfh:lang', () => { renderHeader(); renderPanel(); });
-  document.addEventListener('kfh:map-ready', () => { loadMarkers(); drawRaidTargets(); });
+  document.addEventListener('kfh:map-ready', () => { loadMarkers(); drawRaidTargets(); loadTerritories(); });
 
   (async () => {
     if (state.invite) {
