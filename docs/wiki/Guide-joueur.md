@@ -13,17 +13,18 @@ Panneau **Mon compte** → **Créer une faction** → nom + type (**Autoritaire*
 ## Demander à rejoindre
 Sans lien d'invitation : **Demander à rejoindre une faction** (choix de la faction + petit message). Le Créateur (ou le Chef en démocratique) accepte ou refuse dans la fiche de la faction (pastille rouge).
 
-## Inviter des joueurs (Créateur)
+## Inviter des joueurs (Créateur / Chef)
 **Gérer la faction** → **Générer un lien** (durée et nombre d'utilisations réglables). Le lien est copié : envoie-le sur Discord.
 Le joueur qui l'ouvre se connecte et rejoint la faction comme **Nouveau venu**.
 
-## Gérer la faction (Créateur)
-- Couleur, description, **lien d'invitation Discord** de la faction (bouton « Rejoindre le Discord »).
+## Gérer la faction (Créateur, ou Chef en démocratique)
+- Couleur, description, **activités** (PVP, marchande…), **lien d'invitation Discord** de la faction (bouton « Rejoindre le Discord »).
 - **Rôles qui peuvent voter** (ex. Citoyens oui, Nouveaux venus non, ou seulement le Conseil).
+- **Durée des votes** et **délai d'inactivité** avant qu'un chef puisse être destitué.
 - Changer le rôle d'un membre, l'exclure, ou **transmettre le rôle de Créateur**.
 
 ## Marqueurs
-Les membres (sauf Nouveaux venus) posent des marqueurs enregistrés en ligne, visibles **par la faction** ou **par tous**. L'auteur, le Créateur et l'Architecte peuvent les supprimer (clic sur le marqueur).
+Les membres (sauf Nouveaux venus) posent des marqueurs enregistrés en ligne : clique sur la carte, puis **📍 Placer le marqueur ici**. Visibilité : **ma faction**, **nos alliés** ou **tous**. L'auteur, le Créateur, le Chef et l'Architecte peuvent les modifier ou les supprimer (clic sur le marqueur).
 
 ## Quitter / faire scission
 - **Quitter la faction** : à tout moment. Le Créateur doit d'abord transmettre son rôle, sauf s'il est seul : dans ce cas la faction est **supprimée** (marqueurs, votes et invitations compris).
@@ -44,14 +45,11 @@ Onglet **Votes** (bouton en haut ; le chiffre rouge = votes en attente de ta voi
 - **Modifier un marqueur** : clique dessus → ✏️ Modifier (nom, type, visibilité, base principale).
 - Sur téléphone : bouton **☰ Calques** pour ouvrir le panneau.
 
-## Annonces Discord (Créateur / Chef)
-Gérer la faction → **Annonces sur le Discord de la faction** : colle l'adresse d'un webhook Discord (Paramètres du salon → Intégrations → Webhooks). Le site annonce automatiquement les nouveaux votes et raids (à l'heure locale de chacun), les résultats, les nouveaux membres et les demandes d'adhésion. Bouton **Envoyer un message de test** pour vérifier.
+## Discord de la faction (Créateur / Chef)
+Gérer la faction → **Annonces** (webhook) et/ou **Bot Discord** : annonces des votes et raids, votes par boutons, rôles et surnoms synchronisés. Tout est expliqué sur la page [[Discord|Discord]].
 
-## Bot Discord (Créateur / Chef)
-Gérer la faction → **Bot Discord** :
-1. **Inviter le bot** sur le serveur de la faction (lien fourni).
-2. Colle le **lien d'un salon** (clic droit sur le salon → Copier le lien). Un salon **forum** est conseillé : chaque vote devient un fil.
-3. Coche **Rôles** et/ou **Surnoms**, puis **Enregistrer** et **Synchroniser maintenant**.
+## Territoires
+Le Cartographe, le Créateur ou le Chef tracent les zones de la faction : voir [[Carte interactive|Carte-interactive]].
 
-Le bot crée les rôles de la faction (Chef, Citoyen…) et les attribue, renomme les membres avec leur pseudo en jeu, et publie chaque vote avec des boutons **Pour / Contre**. Pour voter depuis Discord, il faut s'être connecté au site avec ce même compte Discord.
-Le rôle du bot doit être placé **au-dessus** des rôles qu'il gère (Paramètres du serveur → Rôles). Il ne peut pas renommer le propriétaire du serveur.
+## Nouvelle version du site
+Quand le site est mis à jour, un bandeau propose de **Recharger** la page. Rien d'autre à faire.

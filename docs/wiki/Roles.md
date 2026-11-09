@@ -8,20 +8,20 @@ Un membre peut avoir un rôle principal + des métiers.
 | **Créateur** | Fondateur de la faction | Tous les droits, transfert de la faction. Seul à gouverner en régime autoritaire |
 | **Chef** | Dirigeant (régime démocratique) | Gère la faction comme le Créateur (sauf toucher au Créateur) |
 | **Élu** | Membre élu | Vote |
-| **Mercenaire** | Combattant à louer | Peut proposer ses services dans le pool |
-| **Architecte** | Gestion des travaux | Bases et constructions (marqueurs de la faction) |
+| **Conseiller** | Conseil de la faction | Vote |
+| **Architecte** | Gestion des travaux | Modifie et supprime tous les marqueurs de la faction |
 | **Cartographe** | Carte | Trace les territoires de la faction |
-| **Diplomate** | Relations extérieures | Gère la white list / black list |
-| **Milicien** | Défense | Signale les menaces et zones de combat sur la carte |
-| **Marchand** | Commerce | Gère les routes et points de commerce |
-| **Forgeron / Artisan** | Production | Lecture + marqueurs d'ateliers |
-| **Fermier** | Agriculture | Lecture + marqueurs de fermes (fertilité, eau) |
-| **Mineur** | Ressources | Lecture + marqueurs de gisements (fer, cuivre, pierre) |
-| **Médecin** | Soins | Lecture |
-| **Éclaireur** | Exploration | Ajoute des points d'intérêt sur la carte |
-| **Recrue** | Nouveau membre | Lecture seule |
+| **Diplomate** | Relations extérieures | Alliances, ennemis, engager des mercenaires |
+| **Milicien** | Défense | Marqueurs (menaces, zones de combat) |
+| **Mercenaire** | Combattant à louer | Profil dans le pool des mercenaires |
+| **Citoyen** | Membre confirmé | Vote, marqueurs |
+| **Marchand, Forgeron, Fermier, Mineur, Médecin, Éclaireur** | Métiers | Marqueurs (commerce, ateliers, fermes, gisements, points d'intérêt…) |
+| **Nouveau venu** | Arrivé par invitation ou demande acceptée | Lecture seule, pas de vote |
 
-> Les rôles et droits sont configurables (étape 2 du MVP).
+- **Qui vote** : réglable dans *Gérer la faction* (par défaut Créateur, Chef, Élu, Conseiller, Citoyen).
+- **Faction d'une seule personne** : le Créateur a tous les droits (cartographe, diplomate…).
+- **Indépendant** (sans faction) : gère ses propres points de chute et alliances.
+- Avec le [[bot Discord|Discord]], chaque rôle du site devient un rôle sur le serveur de la faction.
 
 ## Profil d'un membre
 - **Pseudo en jeu** (compte AnarchyKenshi) — modifiable à tout moment (mort, nouveau personnage), avec historique des anciens pseudos
@@ -29,10 +29,12 @@ Un membre peut avoir un rôle principal + des métiers.
 - Rôle principal + métiers
 
 ## Fiche de la faction
-- **Lien d'invitation Discord** de la faction (modifiable par le Créateur et le Diplomate), affiché avec un bouton « Rejoindre le Discord ».
+- **Lien d'invitation Discord** de la faction (modifiable par le Créateur ou le Chef), affiché avec un bouton « Rejoindre le Discord ».
 
 ## Rejoindre une faction
-Le **Créateur** génère un **lien d'invitation**. Le joueur qui l'ouvre rejoint la faction avec le rôle d'intégration (nouveau venu, nom à définir).
+- **Lien d'invitation** généré par le Créateur ou le Chef : le joueur qui l'ouvre rejoint la faction comme **Nouveau venu**.
+- **Demande d'adhésion** : sans lien, le joueur choisit la faction et laisse un message ; le Créateur ou le Chef accepte ou refuse.
+- Un mercenaire ou un indépendant peut rejoindre une faction de la même façon.
 
 ## Activités de la faction
 Cases à cocher, modifiables à tout moment : PVP, Marchande, Mercenaires, Exploration, Agriculture, Artisanat, Roleplay. Une faction peut être PVP le matin et marchande le soir.

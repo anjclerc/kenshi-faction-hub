@@ -27,23 +27,39 @@ Autres sources possibles (couches alternatives) :
 
 Conversion monde → carte : `pixel = (coordonnée monde + 147456) / 36` (monde de 64 zones × 4608 unités).
 
-## Marqueurs des joueurs (`data/markers.json`)
+## Marqueurs des joueurs
 Types : Notre base, Cité alliée, Base alliée, Base ennemie, Zone de loot, Ressources, Danger, Autre.
 
-1. Dans le panneau **Ajouter un marqueur**, choisis le type et un nom.
+1. Connecte-toi. Dans le panneau **Ajouter un marqueur**, choisis le type, un nom et la visibilité (**ma faction**, **nos alliés** ou **tous**).
 2. **Clique sur la carte** à l'endroit voulu : un cercle blanc en pointillés marque la position (clique ailleurs pour la changer).
-3. Clique sur **📍 Placer le marqueur ici** pour valider.
-3. Copie la ligne affichée dans `data/markers.json` et fais une Pull Request.
+3. Clique sur **📍 Placer le marqueur ici** : le marqueur est enregistré en ligne.
 
-> À l'étape 2 (comptes), les marqueurs seront enregistrés en ligne directement, avec des droits selon le rôle.
+Clique sur un marqueur pour le **modifier** ✏️ ou le **supprimer** (auteur, Créateur, Chef, Architecte). Une case ★ **Base principale** sert au partage avec les alliés (voir [[Diplomatie|Diplomatie]]).
+
+Sans compte, la carte affiche aussi les marqueurs publics de `data/markers.json` (ajouts possibles par Pull Request).
+
+## Recherche
+Le champ **🔍 Rechercher** trouve une ville, un marqueur ou un territoire et y déplace la carte. Sur téléphone, le bouton **☰ Calques** ouvre le panneau.
 
 ## Territoires
-Le **Cartographe**, le **Créateur** ou le **Chef** (démocratique) : *Faction* → *Nos territoires* → nom → **Tracer sur la carte**, clique les coins (3 minimum), puis **Terminer**. 20 territoires maximum par faction.
+Le **Cartographe**, le **Créateur** ou le **Chef** (démocratique) : *Faction* → *Nos territoires* → nom, **type** et **visibilité** → **Tracer sur la carte**, clique les coins (3 minimum), puis **Terminer**. 20 territoires maximum par faction.
 
-Tout le monde voit les territoires ; l'apparence dépend de ta relation avec la faction :
+Types :
+| Type | Usage |
+|---|---|
+| **À nous** | Zone contrôlée par la faction |
+| **Alliée** | Zone d'un allié |
+| **Neutre** | Zone partagée, sans conflit |
+| **Danger** | Zone à éviter |
+
+Visibilité : **ma faction**, **nos alliés** ou **tous**.
+
+Apparence d'un territoire **« À nous »**, selon ta relation avec la faction qui l'a tracé :
 | Relation | Apparence |
 |---|---|
 | Notre faction | Bleu |
 | Alliée | Halo ambre chaleureux |
 | Ennemie | Rouge hachuré, bordure qui pulse |
 | Neutre | Gris en pointillés |
+
+Les autres types gardent leur apparence : **Alliée** en ambre, **Neutre** en gris, **Danger** en violet pointillé qui pulse.

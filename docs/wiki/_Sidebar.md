@@ -6,6 +6,7 @@
 - [[Intégration en jeu|Integration-en-jeu]]
 - [[Traductions|Traductions]]
 - [[Guide du joueur|Guide-joueur]]
+- [[Discord|Discord]]
 - [[Contribuer|Contribuer]]
 
 ---
