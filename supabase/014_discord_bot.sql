@@ -15,6 +15,7 @@ create schema if not exists private;
 revoke all on schema private from public, anon, authenticated;
 create table if not exists private.bot_key (id int primary key default 1 check (id = 1),
   key text not null default replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''));
+alter table private.bot_key enable row level security;
 insert into private.bot_key default values on conflict do nothing;
 
 -- Vérification de la clé par la fonction (service role uniquement).

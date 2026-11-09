@@ -46,3 +46,12 @@ Onglet **Votes** (bouton en haut ; le chiffre rouge = votes en attente de ta voi
 
 ## Annonces Discord (Créateur / Chef)
 Gérer la faction → **Annonces sur le Discord de la faction** : colle l'adresse d'un webhook Discord (Paramètres du salon → Intégrations → Webhooks). Le site annonce automatiquement les nouveaux votes et raids (à l'heure locale de chacun), les résultats, les nouveaux membres et les demandes d'adhésion. Bouton **Envoyer un message de test** pour vérifier.
+
+## Bot Discord (Créateur / Chef)
+Gérer la faction → **Bot Discord** :
+1. **Inviter le bot** sur le serveur de la faction (lien fourni).
+2. Colle le **lien d'un salon** (clic droit sur le salon → Copier le lien). Un salon **forum** est conseillé : chaque vote devient un fil.
+3. Coche **Rôles** et/ou **Surnoms**, puis **Enregistrer** et **Synchroniser maintenant**.
+
+Le bot crée les rôles de la faction (Chef, Citoyen…) et les attribue, renomme les membres avec leur pseudo en jeu, et publie chaque vote avec des boutons **Pour / Contre**. Pour voter depuis Discord, il faut s'être connecté au site avec ce même compte Discord.
+Le rôle du bot doit être placé **au-dessus** des rôles qu'il gère (Paramètres du serveur → Rôles). Il ne peut pas renommer le propriétaire du serveur.
